@@ -57,7 +57,7 @@ already drifted behind grafio's copies, and nothing noticed.
 
 ```js
 const tests = readdirSync(src, { recursive: true })
-  .filter((file) => file.endsWith(".test.ts"))   // src/**, not scripts/*.test.mjs
+  .filter((file) => file.endsWith(".test.ts")) // src/**, not scripts/*.test.mjs
   .map((file) => path.join("src", file))
   .sort();
 

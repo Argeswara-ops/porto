@@ -29,16 +29,16 @@ error handling, security, and accessibility.
 
 ## Commands
 
-| Command            | Action                                    |
-| :----------------- | :---------------------------------------- |
-| `pnpm install`     | Install dependencies                      |
-| `pnpm dev`         | Dev server at `localhost:4321`            |
-| `pnpm build`       | Production build to `dist/`               |
-| `pnpm preview`     | Preview the production build              |
-| `pnpm lint`        | ESLint                                    |
-| `pnpm format`      | `eslint --fix` then Prettier              |
-| `pnpm check`       | `astro check` (type `.astro`/`.ts`)       |
-| `pnpm test`        | Every `*.test.ts` self-check under `src/` |
+| Command        | Action                                    |
+| :------------- | :---------------------------------------- |
+| `pnpm install` | Install dependencies                      |
+| `pnpm dev`     | Dev server at `localhost:4321`            |
+| `pnpm build`   | Production build to `dist/`               |
+| `pnpm preview` | Preview the production build              |
+| `pnpm lint`    | ESLint                                    |
+| `pnpm format`  | `eslint --fix` then Prettier              |
+| `pnpm check`   | `astro check` (type `.astro`/`.ts`)       |
+| `pnpm test`    | Every `*.test.ts` self-check under `src/` |
 
 ## Project structure
 

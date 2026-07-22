@@ -2,7 +2,7 @@
 title: Index
 type: overview
 created: 2026-06-30
-updated: 2026-07-21
+updated: 2026-07-22
 status: active
 ---
 
@@ -43,6 +43,12 @@ feature lands identical every time. A spec to grow toward, not the current state
 - [[ideal-template/architecture]] — the target `src/` layout (✓ present vs → target) and content-collection ids.
 - [[ideal-template/naming-conventions]] — component folders, variant/sub-component suffixes, the per-directory casing table.
 - [[ideal-template/code-quality]] — the house style (`.claude/rules/*`) with in-repo exemplars to copy from.
+
+## Design
+
+The Figma reproduction record — the durable hex→token mapping and per-section decisions.
+
+- [[design/homepage-figma]] — 8-BitQuest Figma → code: the Figma-hex→token mapping, the pixel motifs, and the built sections (Top navigation, node `5:110`) with the decisions each single-frame mock left unstated.
 
 ## Sources
 

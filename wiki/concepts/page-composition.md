@@ -26,7 +26,7 @@ sub-parts/cards** — so routes own only route concerns and content blocks stay 
 stated in `src/components/Sections/README.md` (and `Cards/README.md`); this page explains how the live
 pages follow it.
 
-> [!note] Restructured 2026-07-18. Previously each page delegated *everything* (including `BaseLayout`)
+> [!note] Restructured 2026-07-18. Previously each page delegated _everything_ (including `BaseLayout`)
 > to a `src/components/<Name>/<Name>.astro` page component. Now the **route owns `BaseLayout` + SEO**
 > and composes **layout-free sections** from `src/components/Sections/` — the shape the dev-only
 > catalog route already had, made uniform.

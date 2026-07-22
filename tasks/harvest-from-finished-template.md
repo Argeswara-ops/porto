@@ -1,8 +1,8 @@
 # Harvest — carry a finished template's lessons back into the boilerplate
 
 Run this **once, at the end of every template's lifecycle**, before you archive it. It is the step
-that was missing when this boilerplate and its first fork drifted apart: lessons flowed *from* the
-boilerplate *into* the template at fork time, and nothing ever flowed back. Four of five rule files
+that was missing when this boilerplate and its first fork drifted apart: lessons flowed _from_ the
+boilerplate _into_ the template at fork time, and nothing ever flowed back. Four of five rule files
 had gone stale against the fork's copies and nothing noticed, because nothing was looking.
 
 Every template you finish learns things. Without this step you keep losing them.

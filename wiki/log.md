@@ -2,7 +2,7 @@
 title: Log
 type: overview
 created: 2026-06-30
-updated: 2026-07-21
+updated: 2026-07-22
 status: active
 ---
 
@@ -311,6 +311,7 @@ Verified: pnpm test/lint green, E2E in a scratch fork (`--yes --keep-adapter` �
 remove fr` → test skips → `pnpm build` clean).
 
 ## [2026-07-18] sync | Sections/Cards restructure + the i18n/Keystatic removal finally absorbed
+
 Touched: overview, index, concepts/page-composition (rewritten), concepts/config-driven,
 subsystems/i18n (rewritten), subsystems/keystatic-cms (now a removal record), subsystems/scripts
 (rewritten), subsystems/seo, subsystems/content-collections, subsystems/icons,
@@ -327,12 +328,14 @@ single-locale language switcher was deleted. Contracts written to Sections/READM
 Cards/README.md; CLAUDE.md structure/i18n claims corrected the same day.
 
 ## [2026-07-18] sync | dropped the unconsumed switcher config
+
 Touched: subsystems/i18n, overview, concepts/page-composition. `languageSwitcherMap` left
 siteSettings.json.ts and `nav_language` left textTranslations (their only consumer, the Home
 language switcher, was deleted in the restructure); siteSettings' header comment no longer cites
 the retired config-i18n script or the removed astro.config i18n block.
 
 ## [2026-07-18] sync | the i18n helper layer is gone — full single-language commit
+
 Touched: subsystems/i18n (now a removal record), overview, index, concepts/page-composition,
 concepts/config-driven, subsystems/{layouts-seo,seo,content-collections,keystatic-cms},
 ideal-template/{architecture,naming-conventions,code-quality}, sources/astro-seo-devto.
@@ -346,13 +349,14 @@ and flows to the section as props; UI strings inlined. BaseHead line anchors re-
 re-anchored to schema.ts/textUtils (the localeUtils exemplars died with the file).
 
 ## [2026-07-21] refactor | harvest pass — the two missing mechanisms, and the first back-port from a finished fork
+
 Touched: subsystems/scripts (rewritten `pnpm test` entry), subsystems/seo (schema.ts anchors
 re-cited, self-check path), concepts/lazy-senior-ethos, ideal-template/architecture (Global/,
 @videos), plus README.md, AGENTS.md, CLAUDE.md, .claude/rules/{typescript,tailwind,motion,seo}.md,
 Sections/README.md.
 Ran `tasks/boilerplate-upgrade-handoff.md` against `~/projects/grafio-theme`, the first finished
-theme forked from this skeleton. The diagnosis held: the boilerplate had the *documentation* of a
-high-quality repo and was missing two of its *mechanisms*.
+theme forked from this skeleton. The diagnosis held: the boilerplate had the _documentation_ of a
+high-quality repo and was missing two of its _mechanisms_.
 
 (1) **`pnpm test` failed open.** `scripts/test.mjs` globbed `scripts/*.test.mjs`; those retired into
 `scripts/deleted/` on 2026-07-17, so it printed "No script checks left to run" and exited 0 while the
@@ -369,7 +373,7 @@ documented commands, so a fork inherits CI on day one.
 Back-ported the four drifted rule files, **generalizing every grafio-only exemplar** rather than
 copying hunks: `getRelatedPosts`/`src/js/blog.ts`, `.page-frame`, `.field` and `Experience.astro` do
 not exist here, and a rule citing a missing file teaches the next agent to invent. Corrected
-typescript.md's claim about this repo's own ESLint (it *downgrades* `no-explicit-any` /
+typescript.md's claim about this repo's own ESLint (it _downgrades_ `no-explicit-any` /
 `no-unused-vars` to `warn`; it never disabled `ban-ts-comment`) and dropped two exemplars that died
 with the i18n layer (`arePostsRelated`, `removeLocale`). Measured the UI catalog's CSS cost **on this
 repo** instead of importing grafio's number: shared stylesheet 76,413 → 56,695 bytes (−25.8%), 70 of
@@ -386,7 +390,7 @@ product. Decisions recorded: empty `Sections/Global/` **deleted** (the architect
 no `/blog/` route, now stated plainly in README + seo.md so the two can't drift;
 `getBreadcrumbSchema` **kept** — grafio deleted it as a dead export, but this repo ships
 `ui/breadcrumb/`, so it is a primitive's schema counterpart, not fiction. The rule it carries is the
-transferable part: pair a `BreadcrumbList` only with a *visible* nav.
+transferable part: pair a `BreadcrumbList` only with a _visible_ nav.
 
 Found while verifying, not fixed: `Sections/NotFound/NotFoundIllustration.astro` mixes `currentColor`
 with 30 raw hex values, a token-discipline violation by the repo's own rule; recorded in
@@ -398,6 +402,7 @@ Verified: `pnpm lint && pnpm check && pnpm build && pnpm test` all green; 0 erro
 every `schema.ts` / `test.mjs` line anchor in the wiki re-checked against the current files.
 
 ## [2026-07-21] refactor | scripts/ down to one file — the graveyard and its orphaned plumbing deleted
+
 Touched: subsystems/scripts (rewritten), overview, index, concepts/{lazy-senior-ethos,page-composition},
 subsystems/{i18n,keystatic-cms}, ideal-template/{architecture,naming-conventions,code-quality}, plus
 .gitignore, tsconfig.json, eslint.config.mjs.
@@ -423,3 +428,13 @@ architecture claimed "~45 primitives" against a real 38; naming-conventions cite
 a path shape that died with the i18n removal, and `detect-package-manager.mjs` as a live exemplar.
 `wiki/log.md` entries before today were left untouched — they record what was true when written.
 Verified: `pnpm lint && pnpm check && pnpm build && pnpm test` green (0 errors, 169 files, 2/2 checks).
+
+## [2026-07-22] sync | design/homepage-figma + Top navigation section
+
+Reproduced Figma node `5:110` (Top Navigation) as `src/components/Sections/Global/Header.astro`,
+wired into `BaseLayout`. New: `config/navData.json.ts` (+ `NavItemProps`), `src/js/nav.ts` (`isActive`
+
+- test), a `retro` variant on `ui/nav/NavLink.astro`, `src/assets/images/hero-avatar.jpg`. Rebranded
+  `siteData` off the Astro Boiler placeholder. Created [[design/homepage-figma]] as the reusable
+  Figma-hex→token mapping + decision record; linked from [[index]]. Verified: lint/check/build/test
+  green, browser-checked light+dark + hover + mobile drawer.

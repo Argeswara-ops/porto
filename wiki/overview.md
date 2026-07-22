@@ -4,7 +4,8 @@ type: overview
 created: 2026-06-30
 updated: 2026-07-21
 tags: [architecture]
-sources: [astro.config.mjs, src/layouts/BaseLayout.astro, CLAUDE.md, src/components/Sections/README.md]
+sources:
+  [astro.config.mjs, src/layouts/BaseLayout.astro, CLAUDE.md, src/components/Sections/README.md]
 status: active
 ---
 
