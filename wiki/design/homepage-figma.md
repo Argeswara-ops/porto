@@ -1,0 +1,215 @@
+---
+title: Homepage Figma → code
+type: design
+created: 2026-07-22
+updated: 2026-07-22
+status: active
+---
+
+# Homepage Figma → code
+
+The reproduction record for the **8-BitQuest** Figma design — the durable Figma→token mapping and the
+recurring motifs, so each new section lands identical without re-deriving the mapping. Read this
+**before** writing markup for a Figma node; add any new one-time decision back here.
+
+- **File:** `GEzHpPLeK9pZhYHGgbmmJX` — [8-BitQuest](https://www.figma.com/design/GEzHpPLeK9pZhYHGgbmmJX/8-BitQuest)
+- **Home frame:** node `5:2`. Sections: nav, hero panel, stats strip, latest posts, tech-stack
+  badges, featured projects, about, contact, footer.
+- The design is delivered as **dark-theme frames**. The token layer flips them to the light theme
+  (a cool inversion of dark — light lavender-blue ground, navy ink; NOT the old cream "paper") for
+  free — never hard-code a Figma hex; map it to a token below. See [[subsystems/styling-tokens]].
+
+## Figma hex → token mapping
+
+The Figma frames are pinned to the dark palette. Each hex is already an alias in
+`src/styles/tailwind-theme.css`; use the **semantic** utility (it flips with the theme) unless the
+value is a fixed palette anchor.
+
+| Figma hex | Palette alias (dark) | Use in markup                   | Notes                                                |
+| :-------- | :------------------- | :------------------------------ | :--------------------------------------------------- |
+| `#101222` | `base-900`           | `bg-background`                 | dark page bg (light = `#e1e1f7` lavender)            |
+| `#1c1e2f` | `base-800`           | `bg-card`                       | panels                                               |
+| `#272939` | `base-700`           | `bg-muted`                      | stats strip / input                                  |
+| `#323445` | `base-600`           | `bg-accent`                     | thumbnails, tags, the nav avatar tile                |
+| `#e1e1f7` | `base-100`           | `text-foreground`               | headings / default nav text                          |
+| `#bfc7d3` | `base-200`           | `text-muted-foreground`         | body copy                                            |
+| `#99cbff` | `primary-300`        | `text-info`                     | airy heading/link blue (the brand wordmark)          |
+| `#41a6f6` | `primary-500`        | `bg-primary` / `text-primary`   | action blue (buttons/badges)                         |
+| `#ffb2ba` | `secondary-200`      | `bg-secondary`                  | retro pink accents                                   |
+| `#63de86` | `success` (dark)     | `text-success` / `fill-success` | the green **active/hover** state                     |
+| `#000000` | —                    | `border-border`                 | pixel borders are **always** pure black, both themes |
+
+## Recurring motifs
+
+- **Pixel border + shadow.** Black borders (`border-border`), sharp corners (`--radius: 0`), and the
+  signature hard offset shadow `--shadow-pixel` (`4px 4px 0 0 #000`, `shadow-pixel`) /
+  `--shadow-pixel-lg` (hero). Always black — the theme's own mark, not a themeable value.
+- **Type.** Headings + labels are **Press Start 2P** (`font-display`, uppercase); body is **Space
+  Mono** (`--font-sans`, the site default). Both preloaded in `BaseHead`.
+- **The retro pointer ►.** A solid right-triangle (`fill-success`) that marks the active/hover item —
+  the classic 8-bit menu selector. Reproduced inline as a one-path SVG (the icon registry is
+  stroke-based `fill=none`, so it can't supply a filled glyph).
+- **Section heading = title + dashed rule.** Every content section (Figma "Heading 2 + Margin"):
+  an airy-blue Press Start `.h2` (`text-info`) + a `flex-1` `border-b-4 border-dashed border-base-300`
+  filler. Componentised once as `Sections/Home/SectionHeading.astro` (`title`/`id` props).
+- **Pixel card.** `bg-card` + `border-4 border-border` + `shadow-pixel` + `p-1`, a thumbnail on
+  `bg-accent` with a 4px black bottom divider, then padded content. `Cards/ContentCard.astro` (posts
+  + projects). Deliberately **not** built on `ui/card` (that primitive is a `<div>` + 1px border; the
+  card needs `<a>`/`<article>` semantics + the pixel structure) — it reuses the same surface tokens.
+- **Pixel chip.** Icon + bold-uppercase label in a `bg-card border-4 shadow-pixel` box —
+  `Sections/Home/PixelChip.astro`, used by Tech Stack (static `<span>`) and Contact socials (`<a>`,
+  green on hover). Icons come from the existing stroke `svg/icons` registry.
+- **Category / tag badge.** The Figma "Background+Border" tag (PLAYER 1 / QUEST / LORE / TECH /
+  PROJECT). Reproduced by a new **`pixel` variant on `ui/badge`** (2px black frame, chunkier padding,
+  bold uppercase) — same opt-in-variant pattern as `ui/nav`'s `retro`. Tone comes from the badge
+  `variant`; **LORE** has no semantic token, so it takes a fixed maroon (`bg-secondary-600
+  text-secondary-100`) via `class`.
+- **Blue pixel button.** The pink `.pixel-btn` was parameterised to four CSS vars (pink default) plus
+  a **`.pixel-btn--blue`** modifier (action blue) for the Figma READ BLOG / EMAIL ME CTAs. The pink
+  render is byte-identical to before.
+
+## Sections built
+
+### Top navigation — node `5:110` (2026-07-22)
+
+`src/components/Sections/Global/Header.astro`, rendered once in `BaseLayout`. Reuses `ui/nav` and
+`ui/sheet` (opened/closed via its `_dialog` `data-dialog-open`/`-close` hooks) — no new primitives.
+Content is wired: brand = `siteData.name`, links = `config/navData.json.ts`; active state via
+`isActive` (`src/js/nav.ts`, tested). Added a **`retro` variant** to `ui/nav/NavLink.astro`
+(Press Start 2P, uppercase, `text-success` on hover/active, reserved `pl-6` + `group` for the
+absolutely-positioned pointer → zero reflow).
+
+The **theme toggle** and the mobile **MENU** / **CLOSE** controls are the pink retro **`.pixel-btn`**
+— a dependency-free port of CodePen "Pure CSS 8bit Button Style" (Maximuz/BdqXXN) in `global.css`
+(flat pink face, inset dark-pink shadow, notched black frame, hover/active press). MENU and CLOSE are
+worded (no icons); the toggle's light/dark glyphs are pixel-art `meteor` / `moon` from the
+`svg/pixel-icons` registry (see the Footer section) — they replaced the original hand-drawn rect glyphs.
+
+**Decisions the single desktop mock didn't specify** (cheap to veto):
+
+- **Placement:** global — in `BaseLayout` above `<main>` (the skeleton was chrome-free; a committed
+  theme wants global chrome). Sticky (`top-0 z-50`).
+- **Container:** full-bleed bar (bg/border/shadow span the viewport), inner content in
+  `.site-container` (`max-w-[1100px]`), not the mock's edge-to-edge `px-16` at 1280.
+- **Responsive:** desktop nav at `lg`+ (measured — the four Press Start labels + brand + toggle stop
+  fitting below ~1024); below `lg` a pink **MENU** button → **Sheet** drawer (native `<dialog>`). Brand
+  wordmark scales `text-base → xs:text-lg → sm:text-2xl` and truncates (`min-w-0`) so a narrow phone
+  never overflows.
+- **Theme toggle:** added to the header (the mock omits it) — the site is dual-theme and the
+  `ThemeToggle` primitive is built to live here.
+- **Avatar:** the "Pixel hero avatar" sprite → `src/assets/images/hero-avatar.jpg`, rendered with a
+  plain `<img>` on the Vite-fingerprinted import (not `<Image>`) so the build needs **no Sharp** (the
+  template ships no images / no Sharp dep). Fine for a 1KB mark.
+- **Routes:** `navData` points at `/`, `/blog/`, `/about/`, `/contact/` (trailing-slash). Only `/`
+  exists today — the other three 404 until their pages land.
+- **Brand copy:** `siteData` rebranded off the "Astro Boiler" placeholder (`name`/`title`/
+  `description`/`defaultImage.alt`).
+
+### Footer — node `5:93` (2026-07-22)
+
+`src/components/Sections/Global/Footer.astro`, rendered once in `BaseLayout` below `<main>`. A
+full-bleed pixel bar (black **top** border `border-t-4`, **no** `shadow-pixel`) with three groups:
+copyright (left, `text-info` #99cbff), a social icon row (centre), legal links (right,
+`text-muted-foreground` #bfc7d3). The four social glyphs are **pixel-art** icons — `linkedin`,
+`rss`, `youtube`, `email` — from the new `svg/pixel-icons` registry (see below), plus
+`.site-container` / `.primary-focus` from `global.css`. Tokens only → light theme flips free. **No
+JS**.
+
+Hover follows the house motif — links **and** icons go **green** (`text-success`, the shared
+active/hover colour) via `transition-colors`. The legal links rest at `text-muted-foreground`; the
+social icons rest **blue in light / pink in dark** (`text-info dark:text-secondary`) — a per-user
+change from the mock's dark-only pink, so the icons stay legible on the light lavender ground.
+(Verified `hover:text-success` wins over `dark:text-secondary` in dark mode — Tailwind emits the
+`hover` rule after `dark`.) Considered reusing `ui/nav`'s `retro` `NavLink` for the legal links but
+its baked `text-[16px] pl-6` pointer sizing fights the 8px legal row — a plain tokenised `<a>` is the
+right scale.
+
+**Decisions the single desktop mock didn't specify** (cheap to veto):
+
+- **Placement / layout:** global footer in `BaseLayout`; `<body>` became `flex min-h-[100lvh]
+flex-col` + `<main class="flex-1">` so the footer pins to the viewport bottom on short pages
+  (sticky-footer). Header stays `sticky top-0` inside the flex column.
+- **Container:** inner content in `.site-container` (`max-w-[1100px]`) to align with the header/page,
+  not the mock's edge-to-edge `px-16` at 1280. Bar height is padding-driven (`py-4`), not the mock's
+  fixed 56px, so it can stack.
+- **Responsive:** one desktop frame → below **`md` (768px)** the three groups stack to a centred
+  column (`flex-col items-center text-center`); at `md`+ they return to `justify-between` row.
+  Measured: the three Press Start groups (~216 + ~128 + ~222px) stop fitting comfortably under
+  ~768px. Verified column at 390px, row at 800/1280px, no horizontal overflow.
+- **Copyright:** year is build-time (`new Date().getFullYear()`); "GAME OVER" kept as retro flavour
+  (the site name lives in the header brand, not repeated here).
+- **Legal routes:** `PRIVACY → /privacy/`, `TERMS → /terms/` (real pages). `CREDITS → /credits/`
+  is an **intended route that 404s until built** — same honest precedent as the nav's
+  `/blog//about//contact`.
+- **Social glyphs & destinations** (user-picked pixel icons, replacing the first pass's
+  share/mail/rss/github): `linkedin → siteData.sameAs` linkedin entry, else `linkedin.com`;
+  `rss → /rss.xml` (intended, 404s until the blog+RSS land per `seo.md`); `youtube → siteData.sameAs`
+  youtube entry, else `youtube.com`; `email → mailto:{author.email}`. Wire real profiles by filling
+  `siteData.sameAs`.
+- **Icon colour:** resting **blue in light** (`text-info`), **pink in dark** (`dark:text-secondary`),
+  green on hover — a deliberate per-user override of the mock's dark-only pink so the light theme has
+  contrast (the first pass flagged the pink-on-lavender contrast issue; this resolves it).
+
+### Pixel-icon registry — `svg/pixel-icons` (2026-07-22)
+
+`src/components/svg/pixel-icons/` — a **second** icon system beside `svg/icons`, for the theme's
+pixel-art glyphs (hand-ported from the Figma _"1300 Free Pixel Icons"_ community set, file
+`CsRVZj1WwtKNAuqZEE2NT0`). Same primitive contract as `Icon` (`data-slot`, exported `tv()`, tokens,
+merged class), but distinct because these glyphs are **fill-based on their own native, often
+non-square viewBox** (`youtube` 32×22.86, `email` 32×25.9) — forcing them through the 24×24
+stroke-based `Icon` would squash them and break the pixel grid. `<PixelIcon>` keeps each source
+viewBox, fills `currentColor`, sizes by **height + `w-auto`** (so non-square glyphs keep aspect), and
+sets `shape-rendering: crispEdges`. Registry today: `moon`, `meteor`, `linkedin`, `rss`, `youtube`,
+`email`. Used by the footer (4 socials) and the **theme toggle** — whose light/dark glyphs are now
+`meteor` (light) / `moon` (dark) at `size="lg"` (the 16px default read too thin on the pink button).
+The node the user linked for "sun" (`1178:17346`) is the set's `weather-meteor` glyph — kept as-is
+per the user's confirmed choice, so light mode shows a comet, not a sun.
+
+### Home content sections — nodes `5:4`–`14:159` (2026-07-22)
+
+The seven `Main Content` (node `5:3`) sections, in `src/components/Sections/Home/`, composed by
+`src/pages/index.astro` inside **one** shared `.site-container` with `gap-10 md:gap-12` (the mock's
+~40px section rhythm). New shared pieces: `SectionHeading`, `PixelChip` (both in `Sections/Home/`),
+`Cards/ContentCard.astro`, the `ui/badge` `pixel` variant, and the `.pixel-btn--blue` modifier (see
+motifs above). Demo imagery ships in `src/assets/images/demo/` (+ `about-avatar.png`) rendered with
+plain `<img>` on the Vite import (no Sharp — the Header-avatar precedent), quantised to ~225 KB total.
+
+- **Hero** (`5:4`): pixel panel (`shadow-pixel-lg`), PLAYER 1 tag, H1, intro line, READ BLOG (blue) +
+  SAY HI (pink) CTAs. Above the fold → **no** scroll-reveal.
+- **Stats** (`5:20`): three neon Press Start stats + short dividers.
+- **Latest Posts** (`5:31`) / **Featured Projects** (`14:34`): `SectionHeading` + a 1/2/3-col
+  `ContentCard` grid.
+- **Tech Stack** (`14:3`): `SectionHeading` + wrapping `PixelChip`s (8 techs).
+- **About** (`14:116`): avatar tile + bio + a `LOCATION`/`ROLE`/`FAVORITE` `<dl>`.
+- **Contact** (`14:137`): centred prompt + EMAIL ME (blue) / LET'S TALK (pink) CTAs + 3 social chips.
+
+**Content classification.** Real / wired: the hero intro, About bio, and Contact prompt are the
+mock's copy verbatim (meaningful, not lorem); EMAIL ME → `mailto:{author.email}`; the Contact socials
+derive from `author.twitter` / `siteData.sameAs` (same shape as the footer). Placeholder demo (typed
+local lists, flagged in each file to swap later): the 3 posts (the `blog` collection is empty + no
+`/blog` route yet), the 3 projects, the 8 techs, the stats, and the About meta. Intended routes that
+**404 until built** (same precedent as the nav): `/blog/<slug>/`, `/projects/<slug>/`, `/contact/`.
+
+**Decisions the single desktop mock didn't specify** (cheap to veto):
+
+- **Hero H1 copy:** the mock's placeholder "WELCOME HERO" → **"Welcome, Player One"** (real headline,
+  ties to the PLAYER 1 tag). The intro paragraph is kept verbatim.
+- **Stats strip stays dark in BOTH themes** (`bg-base-800`, a fixed anchor). The mock maps it to
+  `bg-muted`, which flips to a light grey-blue in light mode where the green/blue stats fail contrast;
+  a fixed dark scoreboard reads as intentional on the light lavender page. Stat colours:
+  POSTS `text-success` / YEARS `text-secondary` (fixed pink) / COFFEE `text-info` — all pass on dark.
+- **LORE badge** is fixed maroon (`secondary-600`), not a flipping token (the mock's dark maroon has
+  no dark-theme semantic; a flip would turn it light-pink). QUEST → `success`, TECH/PROJECT →
+  `primary`, PLAYER 1 → `info`.
+- **Tech-stack icons** map to the nearest existing `svg/icons` glyphs; the set lacks exact
+  `layers`/`cloud`, so **React → `component`** and **AWS → `globe`**. Twitter/X uses `x-01` (no brand
+  glyph in the set) — its logo is an X, so it reads correctly.
+- **Responsive** (measured in a 390/768 iframe, since this env ignores window resize / viewport-meta):
+  card grids `1 → sm:2 → lg:3`; hero + contact CTAs and the stats strip stack below `sm` (dividers
+  `hidden sm:block`); About avatar stacks above the bio below `sm`; tech/social chips `flex-wrap`.
+  No horizontal overflow at any width.
+- **Scroll-reveal** (`<Reveal>`, decorative) added to the five below-fold sections — auto-gated on
+  `siteSettings.useAnimations` + `prefers-reduced-motion` by the primitive. Cards also lift
+  (`hover:-translate + shadow-pixel-lg`, `motion-reduce:` guarded).
+- **Card is one link:** the whole `ContentCard` is an `<a>` (title = accessible name); the "READ →" /
+  "VIEW →" is a visual affordance, not a nested link.
