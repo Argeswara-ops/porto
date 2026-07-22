@@ -54,8 +54,8 @@ value is a fixed palette anchor.
   filler. Componentised once as `Sections/Home/SectionHeading.astro` (`title`/`id` props).
 - **Pixel card.** `bg-card` + `border-4 border-border` + `shadow-pixel` + `p-1`, a thumbnail on
   `bg-accent` with a 4px black bottom divider, then padded content. `Cards/ContentCard.astro` (posts
-  + projects). Deliberately **not** built on `ui/card` (that primitive is a `<div>` + 1px border; the
-  card needs `<a>`/`<article>` semantics + the pixel structure) — it reuses the same surface tokens.
+  - projects). Deliberately **not** built on `ui/card` (that primitive is a `<div>` + 1px border; the
+    card needs `<a>`/`<article>` semantics + the pixel structure) — it reuses the same surface tokens.
 - **Pixel chip.** Icon + bold-uppercase label in a `bg-card border-4 shadow-pixel` box —
   `Sections/Home/PixelChip.astro`, used by Tech Stack (static `<span>`) and Contact socials (`<a>`,
   green on hover). Icons come from the existing stroke `svg/icons` registry.
@@ -63,7 +63,7 @@ value is a fixed palette anchor.
   PROJECT). Reproduced by a new **`pixel` variant on `ui/badge`** (2px black frame, chunkier padding,
   bold uppercase) — same opt-in-variant pattern as `ui/nav`'s `retro`. Tone comes from the badge
   `variant`; **LORE** has no semantic token, so it takes a fixed maroon (`bg-secondary-600
-  text-secondary-100`) via `class`.
+text-secondary-100`) via `class`.
 - **Blue pixel button.** The pink `.pixel-btn` was parameterised to four CSS vars (pink default) plus
   a **`.pixel-btn--blue`** modifier (action blue) for the Figma READ BLOG / EMAIL ME CTAs. The pink
   render is byte-identical to before.
@@ -231,10 +231,10 @@ reused untouched. Visual order top→bottom (by Figma `y`, not node order):
   two-paragraph bio (mock copy verbatim), the CTAs, and a retro scoreboard **stats strip**. Second
   section, still near the fold → **no** `<Reveal>`.
 - **Skill Tree / Tech Stack** (`5:331`): `SectionHeading` + three centred **skill cards** (tag + icon
-  + name). Distinct from the home TechStack's inline `PixelChip`s (larger vertical cards) so the
-  layout is reproduced inline (used once). The tag is the mock's **inverted** pixel tag (black
-  `bg-border` surface + a coloured frame/label per tone) — it does **not** map to the `ui/badge`
-  `pixel` variant (tone bg + dark ink); it's a small whole-class tone map (`success`/`secondary`/`info`).
+  - name). Distinct from the home TechStack's inline `PixelChip`s (larger vertical cards) so the
+    layout is reproduced inline (used once). The tag is the mock's **inverted** pixel tag (black
+    `bg-border` surface + a coloured frame/label per tone) — it does **not** map to the `ui/badge`
+    `pixel` variant (tone bg + dark ink); it's a small whole-class tone map (`success`/`secondary`/`info`).
 - **Project Log** (`25:61`) / **Achievements** (`25:124`): `SectionHeading` + a `ContentCard` grid via
   the shared **`CardGrid`** — six cards each, reused wholesale. Only the status tag and copy differ
   (`[COMPLETE]`→`success`, `[IN PROGRESS]`→`warning`, `UNLOCKED`→`success`).
@@ -277,4 +277,71 @@ placeholder precedent). Intended routes that **404 until built** (same nav prece
 - **Reveal** on the four below-fold sections (Tech Stack / Project Log / Achievements / Gear); the two
   above-fold sections (Dev Profile, Hero) are plain (a scroll-timeline element in view on load renders
   mid-progress). Degrades to static under reduced motion (the primitive's `motion-reduce:animate-none`
-  + `opacity:1` base, verified).
+  - `opacity:1` base, verified).
+
+### Projects pages — nodes `72:7` (list) + `72:191` (detail) (2026-07-22)
+
+The **first dynamic, collection-driven** pages. A `projects` content collection (`content.config.ts`,
+rich Zod schema) backs six `.mdx` entries at `src/data/projects/<slug>/index.mdx`; the glob loader
+gives bare-slug ids (`realtime-chat`, verified in `dist/`). The **free-form "Project Overview" prose
+is the MDX body** (`render()` → `<Content />`); everything the detail page lays out in fixed slots —
+the spec table, the feature list, the challenge/solution pair, the ARC_MAP glyph+caption — is
+**structured frontmatter**, so it renders without parsing prose. `status` drives the retro card badge;
+`order` sorts the listing.
+
+- **Listing** (`/projects/`, node `72:7`) — `pages/projects/index.astro` composes
+  `Sections/Project/ProjectsHero.astro` (MISSION ARCHIVE tag + PROJECT LOG H1 + blurb) and the shared
+  **`CardGrid`** (`headingId="all-systems-heading"`, title "All Systems"), fed the collection sorted by
+  `order`. Cards are the existing **`ContentCard`** — status → badge (`[Complete]`→`success`,
+  `[In Progress]`→`warning`) via the new `Sections/Project/projectCards.ts` (`statusMeta` +
+  `toProjectCard`, tested in `projectCards.test.ts`).
+- **Detail** (`/projects/<slug>/`, node `72:191`) — `pages/projects/[slug].astro` (`getStaticPaths`
+  keyed on `entry.id`, which the card `href` reuses so the two can't drift) renders
+  `Sections/Project/ProjectArticle.astro`: back-nav → `/projects/`, hero (status + `MODULE_ID`, H1,
+  tagline), a **2/3 + 1/3 content split** (left: Overview card wrapping the MDX slot + System Features
+  list with `bg-info` square bullets and bold-blue leads; right: SYS_SPECS `<dl>` with green values +
+  ARC_MAP framed glyph), and a Challenges & Solutions block (`# Threat` pink / `# Remedy` green).
+
+**New canonical surface:** `ui/pixel-panel/` — the bare pixel surface (`bg-card border-4
+border-border shadow-pixel[-lg]` via `tv`, `elevated` prop) promoted to a **ui primitive** so every
+layer can reuse it without a bad cross-`Sections` dependency. It is now the **single** source for the
+surface: the two project heroes, the ContentCard shell (`as="article"`), the About Dev-Profile stats
+card + Gear card (`as="dl"`), and the Home/About hero panels (`as="section"`, which also collapsed
+their redundant `<section><div>` nesting) all render through it — the cluster no longer lives inline
+anywhere. Behaviour-preserving: `--card-foreground` equals `--foreground` in both themes, so the two
+heroes (which set no text colour before) are visually unchanged. `data-access` for the collection is a
+sibling `Sections/Project/projectData.ts` (`getSortedProjects()` — the one draft-filter + order-sort
+behind the listing, the home grid, and the detail `getStaticPaths`), kept apart from the pure,
+astro-free `projectCards.ts` so `pnpm test` can still type-strip the latter.
+
+**Reuse (no other new surface):** `CardGrid`, `ContentCard`, `SectionHeading` (via CardGrid),
+`ui/badge` (`pixel`), the `Icon` registry (`arrow-left` back-nav; the ARC_MAP box uses a single fixed
+decorative glyph — `git-branch-02` — since it's a placeholder diagram frame and `archCaption` carries
+the per-project meaning), the `.h1`/`.h3` classes, `.primary-focus`, and the shared demo images (each
+of the six reused once as a placeholder thumbnail — the home/About precedent).
+
+**Content classification.** Real/wired: the realtime-chat entry is the **mock's copy verbatim**
+(overview, features, specs, challenge/solution, tagline); the SEO title/description per entry. The
+other five are **plausible placeholder demo** matching their listing cards (flagged to swap).
+Thumbnails are the shared placeholder art; alts honestly describe the image, not the project.
+
+**Decisions the two desktop mocks didn't specify** (cheap to veto):
+
+- **Nav: PROJECTS replaces BLOG.** Both frames show `HOME · PROJECTS · ABOUT · CONTACT` (no Blog).
+  Took the mock's 4-label nav exactly — Projects is now a real page, Blog still 404s and stays reachable
+  via the home READ BLOG CTA + footer RSS. Keeps the nav at the tested 4-label width (no `lg` overflow
+  re-measure). One-line revert: re-add `{ label: "Blog", href: "/blog/" }` to `navData`.
+- **Home Featured Projects now reads the collection** (top 3 by `order` via `toProjectCard`), replacing
+  its hardcoded 3-card list whose slugs 404'd — one source, links resolve. Home's featured art/titles
+  therefore change to the first three collection entries.
+- **About "Project Log" section removed** (per the brief) — `Sections/About/ProjectLog.astro` deleted,
+  dropped from `about.astro`; its orphaned hero CTA `#project-log-heading` repointed to `/projects/`.
+  `demoThumbs.ts` stays (Achievements still uses all six).
+- **Content split stacks below `lg`** (1024) — measured: at 768 the two content-dense columns are
+  cramped, so single-column there; 2/3 + 1/3 only at `lg`+. Listing grid `1 → sm:2 → lg:3`. **No
+  horizontal overflow at 390/768/1280** (iframe-measured; this env ignores window resize). Verified in
+  **both themes**; the pages are fully static (no new animation — only CardGrid's reused, RM-guarded
+  Reveal animates).
+- **Heading colours** follow the mock: left-column card titles + Challenges heading = `text-secondary`
+  (pink, `.h3`); right-column terminal labels SYS_SPECS/ARC_MAP = `text-info` (blue, smaller); spec
+  values + `# Remedy` = `text-success`; `# Threat` = `text-secondary`.
