@@ -345,3 +345,73 @@ Thumbnails are the shared placeholder art; alts honestly describe the image, not
 - **Heading colours** follow the mock: left-column card titles + Challenges heading = `text-secondary`
   (pink, `.h3`); right-column terminal labels SYS_SPECS/ARC_MAP = `text-info` (blue, smaller); spec
   values + `# Remedy` = `text-success`; `# Threat` = `text-secondary`.
+
+### Blog pages — nodes `76:4` (listing) + `5:128` (article) (2026-07-22)
+
+The blog subsystem the skeleton **deliberately deferred** (`seo.md`: "no `/blog/` route ships — a
+stated decision"). The `blog` collection existed but shipped empty + route-less; this lands it. The
+task's "Project page" wording was a loose copy of the projects prompt — the two Figma nodes are
+authoritative and are unmistakably a **blog listing + article**, and the "≥3 mdx articles" + "link in
+the nav" asks confirm it. Same collection-driven shape as the projects pages: `blogData.ts` (draft
+filter + `pubDate` sort), `postCards.ts` (pure `categoryMeta` + `toPostCard` + `getAdjacentPosts` /
+`getRelatedPosts`, tested), `pages/blog/index.astro` + `pages/blog/[slug].astro`.
+
+- **Listing** (`/blog/`, node `76:4`) — `Sections/Blog/BlogHero.astro` (MISSION CONTROL tag + LATEST
+  POSTS H1 + Dev Dispatches blurb, verbatim) + the shared **`CardGrid`** ("Archive Modules"), fed the
+  collection newest-first. Cards are the existing **`ContentCard`**; `category` → the retro status
+  badge via `categoryMeta` (QUEST→success, TECH→primary, GUIDE→warning, LORE→fixed maroon
+  `bg-secondary-600`, DEV LOG→info, else primary — the home Latest Posts precedent).
+- **Article** (`/blog/<slug>/`, node `5:128`) — `Sections/Blog/BlogArticle.astro`: breadcrumb
+  (`ui/breadcrumb`) → article `PixelPanel` (category badge, H1, meta row `avatar · date · read · byline`,
+  framed hero banner, the MDX body, footer `#tags` + `◄PREV NEXT►`) + `RelatedPosts.astro`
+  ("More Quests", ≤2 cards). **The article body IS the MDX body** (`render()` → `<Content />`) — unlike
+  the projects' fixed slots, blog prose is free-form (H2/list/blockquote/code), so it renders as
+  markdown and is styled by a new global **`.blog-prose`** class (global, not scoped — MDX HTML is
+  outside Astro's scope; tokens flip with the theme, the fenced code block stays a fixed-dark Shiki
+  panel). The H2 `►` is a green `clip-path` triangle (font-safe, no glyph); list bullets are `bg-info`
+  squares; the blockquote takes the pink `border-secondary` bar.
+
+**New surface:** the six `Sections/Blog/*` files, `src/js/readingTime.ts` (word-count → "N MIN READ",
+tested), the `.blog-prose` class, one `authors/admin.md` entry (byline avatar reuses `hero-avatar.jpg`),
+and a hand-rolled **`pages/rss.xml.ts`** (dependency-free RSS 2.0 — `seo.md` says RSS ships with the
+blog; resolves the footer's existing `/rss.xml` link + a new BaseHead `alternate`). **Reuse:** CardGrid,
+ContentCard, SectionHeading, ui/pixel-panel, ui/badge (`pixel`), ui/breadcrumb, the Icon registry
+(`arrow-left`/`arrow-right`), Reveal, `.h1`/`.h2`/`.h3`, `.primary-focus`, and the existing demo images.
+
+**Content classification.** Real/wired: the listing's six card titles/excerpts/categories are the
+mock's verbatim; `the-art-of-pixel-graphics` carries the **article frame's verbatim body** (dithering,
+the list, the blockquote, the render-loop code, `#pixel`/`#gamedev`) — the flagship; the SEO
+title/description per entry. Placeholder demo (flagged): the other five bodies (plausible authored
+prose, not lorem), the `admin` byline, and the retro dates. The blog schema was reshaped (heroImage
+now **required** + `heroImageAlt`, added `category` + `tags`) — safe, it had zero entries.
+
+**Decisions the two desktop mocks didn't specify** (cheap to veto):
+
+- **Nav: `ABOUT · PROJECTS · BLOG · CONTACT`** (per the user — HOME dropped from the bar; the brand
+  wordmark is the home link, the logo-as-home pattern). Four Press Start labels fit the desktop bar at
+  `lg` (iframe-measured at 1024: no overflow, desktop nav shown, MENU button hidden), so the header
+  keeps the original `lg` breakpoint. (An earlier five-label pass needed `xl`; dropping HOME returned
+  it to `lg`.)
+- **Home Latest Posts now reads the collection** (top 3 by date via `toPostCard`) — the rewire its own
+  TODO asked for; the three placeholder slugs (`building-the-ultimate-css-grid`, …) are now real, so
+  those long-dead home links resolve. Same move Featured Projects got.
+- **Related + prev/next are computed, not transcribed.** The mock names two specific related posts;
+  instead `getRelatedPosts` picks same-category-then-recent siblings and `getAdjacentPosts` the date
+  neighbours, so every link resolves and there are no orphan routes. Article frame's "DEV LOG" tag and
+  "Mastering the 8-Bit Grid" H1 are realized as the flagship post's own `category` (LORE) + title
+  (card and article share one field) — the two frames show different example posts, so the listing
+  frame (the catalog) wins on the concrete inventory.
+- **Article column** is the mock's centred ~800px reading width (`max-w-[800px] mx-auto`) inside the
+  1100px `.site-container`; the listing is full container like the other pages.
+- **One image per post** — the card thumbnail and the article hero banner share the post's `heroImage`
+  (the projects/About placeholder precedent), rather than the mock's separate card vs banner art.
+- **Article H1 = `text-foreground`** (matches the mock's light title), where the listing/hero H1s stay
+  `text-info` blue — the article reads as content, not a marketing hero.
+- **Code-block copy button omitted** (the mock shows one) — it needs JS and the template favours
+  zero-JS; the fenced block ships static. Add a bundled `_client.ts` copy handler if wanted.
+- **Responsive** (iframe-measured 390/768, this env ignores window resize): listing grid `1 → sm:2 →
+  lg:3`; related `1 → sm:2`; the article's long code lines scroll **inside** the `<pre>`
+  (`overflow-x-auto`), never the page. **No horizontal overflow at 390/768** (page scrollWidth ==
+  clientWidth); verified light **and** dark. Below-fold sections use the RM-guarded `Reveal`.
+- **SEO:** each article emits a `BlogPosting` + a `BreadcrumbList` matching the visible breadcrumb
+  (`seo.md` — never one without the other) + the `article` prop (`og:type=article`).
