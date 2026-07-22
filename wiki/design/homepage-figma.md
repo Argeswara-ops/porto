@@ -302,10 +302,17 @@ the spec table, the feature list, the challenge/solution pair, the ARC_MAP glyph
   list with `bg-info` square bullets and bold-blue leads; right: SYS_SPECS `<dl>` with green values +
   ARC_MAP framed glyph), and a Challenges & Solutions block (`# Threat` pink / `# Remedy` green).
 
-**New shared surface:** `Sections/Project/PixelPanel.astro` — the bare pixel surface
-(`bg-card border-4 border-border shadow-pixel[-lg]` via `tv`, `elevated` prop) extracted because it
-recurs 6× on the detail page (tailwind.md's 3+ rule). It deliberately does **not** refactor the
-inline hero panels on Home/About — those stay; a later pass can migrate them onto it.
+**New canonical surface:** `ui/pixel-panel/` — the bare pixel surface (`bg-card border-4
+border-border shadow-pixel[-lg]` via `tv`, `elevated` prop) promoted to a **ui primitive** so every
+layer can reuse it without a bad cross-`Sections` dependency. It is now the **single** source for the
+surface: the two project heroes, the ContentCard shell (`as="article"`), the About Dev-Profile stats
+card + Gear card (`as="dl"`), and the Home/About hero panels (`as="section"`, which also collapsed
+their redundant `<section><div>` nesting) all render through it — the cluster no longer lives inline
+anywhere. Behaviour-preserving: `--card-foreground` equals `--foreground` in both themes, so the two
+heroes (which set no text colour before) are visually unchanged. `data-access` for the collection is a
+sibling `Sections/Project/projectData.ts` (`getSortedProjects()` — the one draft-filter + order-sort
+behind the listing, the home grid, and the detail `getStaticPaths`), kept apart from the pure,
+astro-free `projectCards.ts` so `pnpm test` can still type-strip the latter.
 
 **Reuse (no other new surface):** `CardGrid`, `ContentCard`, `SectionHeading` (via CardGrid),
 `ui/badge` (`pixel`), the `Icon` registry (`arrow-left` back-nav; the ARC_MAP box uses a single fixed
