@@ -295,8 +295,8 @@ the spec table, the feature list, the challenge/solution pair, the ARC_MAP glyph
   `order`. Cards are the existing **`ContentCard`** — status → badge (`[Complete]`→`success`,
   `[In Progress]`→`warning`) via the new `Sections/Project/projectCards.ts` (`statusMeta` +
   `toProjectCard`, tested in `projectCards.test.ts`).
-- **Detail** (`/projects/<slug>/`, node `72:191`) — `pages/projects/[...slug].astro` (`getStaticPaths`
-  keyed on `entry.id`; `[...slug]` rest param so the id and the card `href` can't drift) renders
+- **Detail** (`/projects/<slug>/`, node `72:191`) — `pages/projects/[slug].astro` (`getStaticPaths`
+  keyed on `entry.id`, which the card `href` reuses so the two can't drift) renders
   `Sections/Project/ProjectArticle.astro`: back-nav → `/projects/`, hero (status + `MODULE_ID`, H1,
   tagline), a **2/3 + 1/3 content split** (left: Overview card wrapping the MDX slot + System Features
   list with `bg-info` square bullets and bold-blue leads; right: SYS_SPECS `<dl>` with green values +
@@ -308,9 +308,10 @@ recurs 6× on the detail page (tailwind.md's 3+ rule). It deliberately does **no
 inline hero panels on Home/About — those stay; a later pass can migrate them onto it.
 
 **Reuse (no other new surface):** `CardGrid`, `ContentCard`, `SectionHeading` (via CardGrid),
-`ui/badge` (`pixel`), the `Icon` registry (`arrow-left` back-nav; per-project ARC_MAP glyph guarded
-against `iconNames`, default `server-05`), the `.h1`/`.h3` classes, `.primary-focus`, and the shared
-demo images (each of the six reused once as a placeholder thumbnail — the home/About precedent).
+`ui/badge` (`pixel`), the `Icon` registry (`arrow-left` back-nav; the ARC_MAP box uses a single fixed
+decorative glyph — `git-branch-02` — since it's a placeholder diagram frame and `archCaption` carries
+the per-project meaning), the `.h1`/`.h3` classes, `.primary-focus`, and the shared demo images (each
+of the six reused once as a placeholder thumbnail — the home/About precedent).
 
 **Content classification.** Real/wired: the realtime-chat entry is the **mock's copy verbatim**
 (overview, features, specs, challenge/solution, tagline); the SEO title/description per entry. The
