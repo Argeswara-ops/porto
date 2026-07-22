@@ -213,3 +213,68 @@ local lists, flagged in each file to swap later): the 3 posts (the `blog` collec
   (`hover:-translate + shadow-pixel-lg`, `motion-reduce:` guarded).
 - **Card is one link:** the whole `ContentCard` is an `<a>` (title = accessible name); the "READ →" /
   "VIEW →" is a visual affordance, not a nested link.
+
+### About page — node `5:278` (2026-07-22)
+
+The **"Pixel Quests - About Me"** frame — six stacked `Main Content` sections in
+`src/components/Sections/About/`, composed by `src/pages/about.astro` inside the **same** shell as
+`index.astro` (one `.site-container` + `gap-10 md:gap-12`). This is the page the header nav's
+**ABOUT** link points at (it 404'd until now). Header + Footer are the existing global chrome —
+reused untouched. Visual order top→bottom (by Figma `y`, not node order):
+
+- **Dev Profile** (`5:303`): `SectionHeading` + a pixel avatar tile beside a "character sheet" card
+  — `ROLE`/`YRS` rows plus two HP-style skill bars (`FRONTEND 95%` / `BACKEND 90%`). First section →
+  above the fold → **no** `<Reveal>`. The bar track is the **fixed black pixel surface** (`bg-border`
+  — the same token as the frames), the fill `bg-info`; both read on the card in either theme (the
+  card flips, the track stays black). Bars are `aria-hidden` (the `95%` text carries the value).
+- **Hero** (`5:280`): the profile panel (`shadow-pixel-lg`) — a `DEV 01` info `Badge`, the H1, a
+  two-paragraph bio (mock copy verbatim), the CTAs, and a retro scoreboard **stats strip**. Second
+  section, still near the fold → **no** `<Reveal>`.
+- **Skill Tree / Tech Stack** (`5:331`): `SectionHeading` + three centred **skill cards** (tag + icon
+  + name). Distinct from the home TechStack's inline `PixelChip`s (larger vertical cards) so the
+  layout is reproduced inline (used once). The tag is the mock's **inverted** pixel tag (black
+  `bg-border` surface + a coloured frame/label per tone) — it does **not** map to the `ui/badge`
+  `pixel` variant (tone bg + dark ink); it's a small whole-class tone map (`success`/`secondary`/`info`).
+- **Project Log** (`25:61`) / **Achievements** (`25:124`): `SectionHeading` + a `ContentCard` grid via
+  the shared **`CardGrid`** — six cards each, reused wholesale. Only the status tag and copy differ
+  (`[COMPLETE]`→`success`, `[IN PROGRESS]`→`warning`, `UNLOCKED`→`success`).
+- **Setup / Gear** (`25:215`): `SectionHeading` + a single pixel card holding a five-row `<dl>` spec
+  list — the same label→value row as the Dev Profile card.
+
+**Reuse.** `SectionHeading`, `CardGrid`, `ContentCard`, `ui/badge` (`pixel`), the `Icon` registry,
+`.pixel-btn` (+`--blue`), the `.h1`/`.h2`/`.h3` classes, and the shared demo images — all reused in
+place (About sections import the two shared shells from `Sections/Home/`). New surface: **none** —
+only the six section files + the route. **The button is `.pixel-btn`**, the site's existing
+dependency-free port of the CodePen "Pure CSS 8bit Button Style" (Maximuz/BdqXXN) the brief asked for.
+
+**Content classification.** Real/wired: the bio (mock copy verbatim), the page `title`/`description`
+(About-specific SEO), `GET IN TOUCH → /contact/`. Placeholder demo (typed local, flagged per file to
+swap): the profile role/years/skill %s, the stats strip, the 6 projects, the 6 achievements, the 5
+gear rows, and the thumbnails (**reuse** the six shared demo images — each appears once in Project Log
+and once in Achievements — rather than the mock's per-card art, keeping the repo lean; the home-page
+placeholder precedent). Intended routes that **404 until built** (same nav precedent):
+`/projects/<slug>/`; achievement cards point at `#` (no detail route).
+
+**Decisions the single desktop mock didn't specify** (cheap to veto):
+
+- **CTAs added to the Hero.** The mock's hero has no button, but the brief asked for the `.pixel-btn`.
+  Added a matching CTA row (home-hero pattern): `VIEW PROJECTS` (blue) → `#project-log-heading`,
+  `GET IN TOUCH` (pink) → `/contact/`. Stacks below `sm`.
+- **Stats strip stays fixed-dark in BOTH themes** (`bg-base-700`, `#272939`, a palette anchor that
+  doesn't flip) — same call as the home Stats scoreboard. Colours chosen to pass on that dark strip in
+  light mode too: `text-success` (both themes pass), `text-secondary` (fixed pink), and the blue uses
+  the **fixed `text-primary-300`** alias — semantic `text-info` would flip to a deep blue that fails
+  contrast on the dark strip (measured ~2.7:1). Separators are `bg-base-400 h-3.5 w-1`, hidden below
+  `lg` where the four Press Start items stack.
+- **Skill-tag tones** (mock shows three colours): JS→`success`, Python→`secondary`, React→`info`;
+  icons reuse the home TechStack glyph choices (`code-01`/`flash-on`/`component`).
+- **Responsive** (measured in a 390/768 iframe — this env ignores window resize): card grids
+  `1 → sm:2 → lg:3`; skill cards `1 → sm:3`; Dev Profile avatar stacks above the card below `sm`; hero
+  CTAs + stats strip stack below `sm`/`lg`. **No horizontal overflow at any width** — the long
+  `ACHIEVEMENTS UNLOCKED` heading forced dropping **`whitespace-nowrap` from the shared
+  `SectionHeading`** (the home's shorter titles are byte-identical; long titles now wrap on narrow
+  screens instead of overflowing 390px by 22px).
+- **Reveal** on the four below-fold sections (Tech Stack / Project Log / Achievements / Gear); the two
+  above-fold sections (Dev Profile, Hero) are plain (a scroll-timeline element in view on load renders
+  mid-progress). Degrades to static under reduced motion (the primitive's `motion-reduce:animate-none`
+  + `opacity:1` base, verified).
