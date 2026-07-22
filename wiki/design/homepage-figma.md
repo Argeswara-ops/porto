@@ -462,9 +462,11 @@ Docker** (a Node server fits; swap the adapter in two lines if the host changes)
 **Token mapping (all already in the table above).** Form fields + info-card value boxes = `bg-accent`
 (#323445 dark / #bfc7d3 light) + `border-border` (always black); labels = `text-info`; SEND MESSAGE
 title = `text-secondary`; FAQ question = `text-secondary`, answer = `text-muted-foreground`, dashed
-rules = `border-base-300` (#89919c). New surface: the **`.pixel-btn--green`** modifier (fixed #63de86
-face / #00401b ink — no `--color-success-*` ramp exists and the pixel button doesn't flip, so it takes
-the mock's literal greens like the pink/blue faces).
+rules = `border-base-300` (#89919c). New surface: a **`success` palette ramp** (`--color-success-*` in
+`tailwind-theme.css`, anchored on the Figma greens) — the one status colour promoted to a full ramp so
+the semantic `--success` reads it and the new **`.pixel-btn--green`** modifier can point at fixed,
+non-flipping anchors (`-400` face / `-300` hover / `-900` ink / `-600` depth), the action-green
+counterpart to `--blue`. Values match the old green literals exactly, so nothing shifts visually.
 
 **Reuse (no new primitive):** `PixelPanel`, `Badge` (`pixel`), `Input`/`Textarea`/`Label`,
 `Accordion`/`AccordionItem`/`AccordionContent`, `SectionHeading`, `Reveal`, `socialUrl`, the
