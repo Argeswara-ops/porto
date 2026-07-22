@@ -415,3 +415,86 @@ now **required** + `heroImageAlt`, added `category` + `tags`) — safe, it had z
   clientWidth); verified light **and** dark. Below-fold sections use the RM-guarded `Reveal`.
 - **SEO:** each article emits a `BlogPosting` + a `BreadcrumbList` matching the visible breadcrumb
   (`seo.md` — never one without the other) + the `article` prop (`og:type=article`).
+
+### Contact page — node `9:4` (2026-07-22)
+
+The **"contact-page"** frame — the first (and only) **server-rendered** page. Three stacked blocks in
+`src/components/Sections/Contact/`, composed by `src/pages/contact.astro` in the same shell as
+index/about (one `.site-container` + `gap-10 md:gap-12`). This is the nav's **CONTACT** target (it
+404'd until now). Visual order top→bottom:
+
+- **Hero** (`9:22`): `PixelPanel as="section" elevated` + a `QUEST START` info `Badge` (pixel) + the H1
+  (`.h1 text-info`) + the intro line (mock copy verbatim). Above the fold → NO `<Reveal>`. Byte-for-byte
+  the Home/About hero shape.
+- **Form** (`9:31`): the `SEND MESSAGE` card — the **one server-driven piece**. Reuses `PixelPanel`
+  (elevated) + the `Input`/`Textarea`/`Label` primitives, re-skinned to the pixel field look
+  (`bg-accent` + a 4px black frame) via a shared class. Fields: YOUR NAME / EMAIL ADDRESS / SUBJECT
+  (Input) + MESSAGE TRANSMISSION (Textarea). Submit is the new **green** pixel button.
+- **InfoCards** (`9:53`): three `PixelPanel` cards beside the form — a `pixel` `Badge` (E-MAIL→info /
+  COMMUNITY→success / CODEBASE→secondary), an `.h3` title, a blurb, and a **linked** value box
+  (`bg-accent border-2`, green-on-hover).
+- **Faq** (`9:75`): `SectionHeading` + a `PixelPanel` of `Accordion` rows (native `<details>`,
+  zero-JS). Below the fold → `<Reveal>`.
+
+**The Resend contact form (the grafio pattern; astrocraft-doc → `grafio/contact-form.md`).** The site
+was fully static; this adds its **one on-demand route**. `contact.astro` sets `export const prerender
+= false`; `@astrojs/node` (`mode: "standalone"`) is mounted in `astro.config.mjs` so that one route
+runs server-side — chosen over Netlify/Vercel because this project deploys behind **Dokploy + Traefik +
+Docker** (a Node server fits; swap the adapter in two lines if the host changes). The pieces:
+
+- **`src/js/contact.ts`** — the trust boundary, pure + framework-free (no `import.meta.env`, no
+  `fetch`) so it type-strips for `pnpm test`: the `contactSchema` (Zod; CRLF refine on `name`/`subject`
+  = header-injection guard), `MIN_FILL_MS` + `spamReason` (honeypot `_gotcha` + time gate `_ts`,
+  server-clock), `escapeHtml`, and `buildEmail` (HTML-escaped body, `replyTo` = sender). Runnable
+  check: `contact.test.ts`.
+- **`src/actions/index.ts`** — the `contact` Astro Action (`accept: "form"`, so the native
+  `<form method="POST">` works **with JS disabled**). Runs the spam gates, checks the mail keys **at
+  request time** (a missing key never breaks the build), then a plain `fetch` to Resend (`no SDK`, 10s
+  timeout). Resend's own reply is logged server-side, never shown (it can name the account).
+- **`Form.astro`** reads `Astro.getActionResult` → success replaces the card (`role="status"`),
+  validation errors render per-field (`isInputError` + `aria-invalid` + `aria-describedby`),
+  everything else in one `role="alert"`. A tiny script moves focus to the status region after the
+  swap (no `preventDefault` — the view-transition router owns the submit).
+- **Env** (in `.env.example`): `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, optional `CONTACT_FROM_EMAIL`
+  (defaults to `onboarding@resend.dev`, which only delivers to the account owner). **Turnstile is
+  deliberately omitted** to keep the no-JS path (it's the optional both-or-neither layer in grafio).
+
+**Token mapping (all already in the table above).** Form fields + info-card value boxes = `bg-accent`
+(#323445 dark / #bfc7d3 light) + `border-border` (always black); labels = `text-info`; SEND MESSAGE
+title = `text-secondary`; FAQ question = `text-secondary`, answer = `text-muted-foreground`, dashed
+rules = `border-base-300` (#89919c). New surface: the **`.pixel-btn--green`** modifier (fixed #63de86
+face / #00401b ink — no `--color-success-*` ramp exists and the pixel button doesn't flip, so it takes
+the mock's literal greens like the pink/blue faces).
+
+**Reuse (no new primitive):** `PixelPanel`, `Badge` (`pixel`), `Input`/`Textarea`/`Label`,
+`Accordion`/`AccordionItem`/`AccordionContent`, `SectionHeading`, `Reveal`, `socialUrl`, the
+`.h1`/`.h3` classes, `.primary-focus`, `.pixel-btn` (+ the new `--green`).
+
+**Content classification.** Real/wired: the hero + FAQ copy is the mock's verbatim (meaningful, not
+lorem); the E-MAIL value is `siteData.author.email` (→ mailto); GITHUB/DISCORD derive from
+`siteData.sameAs` via `socialUrl` (header/footer precedent), NOT the mock's placeholder brand
+(HELLO@PIXELQUESTS.COM etc.). Editorial placeholder (flagged): the three FAQ Q&A.
+
+**Decisions the single desktop mock didn't specify** (cheap to veto):
+
+- **Deploy target: `@astrojs/node` standalone**, per the Dokploy/Traefik/Docker infra (astrocraft-doc's
+  own deploy shape). Grafio ships Netlify by default — swap is two lines (`pnpm add @astrojs/vercel` /
+  `@astrojs/netlify` + one `adapter:` line); nothing else knows which adapter is mounted. The build is
+  now `dist/client` + `dist/server` (not a flat `dist/`) — `seo.md`'s check note was updated.
+- **`/contact/` is added to the sitemap by hand** (`sitemap({ customPages })`) — the on-demand route
+  emits no static file, so the auto-enumerator can't see it (the one manual entry `seo.md` prescribes).
+- **Error affordance is the red message + `aria-invalid` ring, not a recoloured border** — black
+  borders are the theme invariant, and it also sidesteps grafio's "colour in a field override beats
+  `state=error`" trap. Fields carry SHAPE only in their class override.
+- **FAQ: independent rows, first open**, with a bespoke retro **+/−** marker (two token bars, the
+  vertical fades when open) to match the mock's "+", where the accordion primitive's default trigger
+  draws a chevron. The mock shows all three expanded (a static render); first-open-collapsible is the
+  conventional read.
+- **Responsive** (iframe-measured 390, this env ignores window resize): form/info grid
+  `1 → lg:[minmax(0,1fr)_340px]` (form grows, info column fixed 340, stacks below `lg`); form CTAs and
+  fields are full-width; FAQ rows wrap. **No horizontal overflow at 375/1521**; verified light **and**
+  dark. Below-fold FAQ uses the RM-guarded `Reveal`; the +/− `transition-opacity` is caught by the
+  global reduced-motion guard.
+- **Nav unchanged** — CONTACT was already `navData` → `/contact/` (it just resolves now). The "≥3 mdx
+  articles / nav link" line in the task is leftover from the blog prompt: the `blog` collection already
+  ships **6** mdx articles and BLOG is already in the nav, so it's satisfied — no redundant posts added.

@@ -120,8 +120,11 @@ When the route lands, these three come with it (**deliberately not built** until
 
 ## The check
 
-`pnpm build`, then confirm the artifacts in `dist/` (a fully static build — no adapter, so the tree
-is flat, not `dist/client/`): valid JSON-LD in the HTML `<head>` (a `@graph` with matching `@id`s),
+`pnpm build`, then confirm the artifacts in `dist/`. The build is static **except one route**:
+`/contact/` sets `export const prerender = false` (it takes the Resend form POST and re-renders with
+the result), so `@astrojs/node` is mounted and the prerendered tree now lands in **`dist/client/`**
+(with the one server entry in `dist/server/`), not a flat `dist/`. Everything below still holds —
+just look under `dist/client/`: valid JSON-LD in the HTML `<head>` (a `@graph` with matching `@id`s),
 `robots.txt` + `llms.txt` with absolute URLs, and `sitemap-0.xml` listing only indexable,
 trailing-slash URLs. The JSON-LD builders carry a runnable self-check: `pnpm test` (or directly:
 `node --experimental-strip-types src/js/schema.test.ts`).
