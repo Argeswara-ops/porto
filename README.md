@@ -190,7 +190,7 @@ the contact keys above. See `.env.example`.
    by roughly a quarter (measured 76.4 KB → 56.7 KB on the stock catalog) and drops ~70 unused
    `@keyframes`.
 7. **Remove the authoring notes** — `tasks/` holds the template's own build and handoff prompts
-   (including `audit-prompt.md`), not your project's work — delete the folder. Keep `wiki/` and
+   (including `cleanup-audit-prompt.md`), not your project's work — delete the folder. Keep `wiki/` and
    `.claude/` if you want the documented, Claude-navigable workflow they describe (see [Docs](#docs)).
 
 ## Verifying a change

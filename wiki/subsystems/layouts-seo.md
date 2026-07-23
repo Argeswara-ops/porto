@@ -2,7 +2,7 @@
 title: Layouts & SEO
 type: subsystem
 created: 2026-06-30
-updated: 2026-07-18
+updated: 2026-07-23
 tags: [layout, seo, view-transitions, theme]
 sources:
   - src/layouts/BaseLayout.astro
@@ -31,9 +31,10 @@ template.
 `src/layouts/BaseHead.astro` owns everything in `<head>` using **native tags only** (no SEO dependency).
 It carries two concerns:
 
-- **Page-shell bits** (this page) — charset/viewport/generator, a `<link rel="preload">` for the
-  variable Inter font for faster first paint (`BaseHead.astro:53`), favicons (`BaseHead.astro:56-57`),
-  the sitemap link (`BaseHead.astro:59`), and the two gotchas below (pre-paint theme + view transitions).
+- **Page-shell bits** (this page) — charset/viewport/generator, two `<link rel="preload">` faces (the
+  Press Start 2P pixel headings + the Space Mono body, single-weight woff2) for faster first paint
+  (`BaseHead.astro:53-54`), favicons (`BaseHead.astro:57-58`), the sitemap link (`BaseHead.astro:60`),
+  and the two gotchas below (pre-paint theme + view transitions).
 - **The SEO layer** — title/description/canonical, OG/Twitter, and JSON-LD structured data (no
   hreflang: single-language site since the i18n removal). Large enough to have its own page:
   **[[subsystems/seo]]**. The one fact to keep here: canonical + `og:url` derive from `Astro.site`

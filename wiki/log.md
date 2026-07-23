@@ -472,3 +472,24 @@ as removal-era history); ThemeToggle documented as reusing `.pixel-btn` (its own
 not the `button` recipe; `getBreadcrumbSchema` now used (blog posts pair `BlogPosting` with a visible
 breadcrumb); primitive count trued to 39; i18n/Keystatic in past tense (removal pages kept). Cite drift
 from the extended `getArticleSchema` reconciled in subsystems/seo.md.
+
+## [2026-07-23] refactor | code-quality review — HeroPanel extraction, barrel cleanup, doc drift
+
+Thermo-nuclear code-quality pass over the whole repo. **Structural:** extracted
+`Sections/Global/HeroPanel.astro` — the five page heroes (Home/About/Contact/Blog/Projects) repeated
+one `PixelPanel`+`Badge`+`H1` shell and had begun to drift (Contact dropped `text-balance`, Home used
+`max-w-2xl` vs siblings' `max-w-3xl`); the three simple heroes collapse to one prop call, Home/About
+pass extras through the slot. Deduped the header nav into `Sections/Global/HeaderNavLinks.astro`
+(desktop + mobile Sheet shared the same `navItems.map` + ► pointer). **Barrels:** replaced the dead
+`XVariants = { recipe }` identity-wrapper in all 40 primitive barrels (38 `ui/` + `svg/icons` +
+`svg/pixel-icons`) with direct bare-recipe exports — nothing imported the wrapper and consumers
+already used the bare recipe — and updated the `ui/README.md` contract "shape" to match. **rss.ts**
+now runs the three URL interpolations (link/guid/channel.link) through the existing `escapeXml`
+(+regression assert). **Docs re-grounded to the live theme:** `.claude/rules/tailwind.md` now
+describes `NotFoundIllustration` as the conforming reference (its raw-hex violation was already
+fixed); styling-tokens — palette layer is direct-hex ramps (not violet/zinc aliases), font is Press
+Start 2P + Space Mono (not Inter), `.form__input` removed, stale line anchors re-cited; layouts-seo —
+two-face preload (not "variable Inter"); icons — added a `<PixelIcon>` sibling-registry section;
+README tasks-file name; `tailwind-theme.css` header comment. Touched: subsystems/styling-tokens,
+subsystems/layouts-seo, subsystems/icons. Verified: `pnpm lint && pnpm check && pnpm build && pnpm
+test` green.

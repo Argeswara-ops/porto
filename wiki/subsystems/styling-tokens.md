@@ -2,7 +2,7 @@
 title: Styling & token architecture
 type: subsystem
 created: 2026-06-30
-updated: 2026-07-02
+updated: 2026-07-23
 tags: [tailwind, css, theming, dark-mode]
 sources:
   - src/styles/global.css
@@ -24,15 +24,16 @@ Tailwind colors (`bg-violet-700`, `text-zinc-300`), which bypass theming and dar
 ([[subsystems/layouts-seo]]). `src/styles/tailwind-theme.css` is kept separate so it can _also_ be
 imported into a `.astro` `<style>` block. Together they implement three layers:
 
-1. **Palette aliases** — `@theme` in `tailwind-theme.css:15` names a brand palette on top of Tailwind's
-   scale: `--color-primary-*` → `--color-violet-*`, `--color-base-*` → `--color-zinc-*`. Repointing
-   these two ramps is the entire rebrand.
+1. **Brand palette ramps** — `@theme` in `tailwind-theme.css:15` defines the brand ramps as **direct
+   hex** (`--color-primary-500: #41a6f6`, `--color-base-500: #3f4358`, each ramp `-50`…`-950`). The
+   8-BitQuest theme dropped the Tailwind-scale aliasing (`--color-*: var(--color-violet-*)`) the
+   skeleton shipped with; repointing these hexes is the entire rebrand.
 2. **Semantic runtime vars** — `@layer base` in `global.css:25` defines `:root` and `.dark` sets of
    semantic vars (`--background`, `--foreground`, `--primary`, `--muted`, `--border`, status colors,
-   `--radius`, …) that **flip with the theme** (`global.css:27-79`).
-3. **The bridge** — `@theme inline` in `tailwind-theme.css:85` maps the semantic vars to utility colors
+   `--radius`, …) that **flip with the theme** (`:root` at `global.css:32`, `.dark` at `:68`).
+3. **The bridge** — `@theme inline` in `tailwind-theme.css:137` maps the semantic vars to utility colors
    (`--color-background: var(--background)`). `inline` is required so utilities resolve to the _runtime_
-   var, not a frozen value — there's a comment + upstream link explaining why (`tailwind-theme.css:83-84`).
+   var, not a frozen value — there's a comment + upstream link explaining why just above it.
 
 So `text-foreground` → `--color-foreground` → `--foreground` → the `:root`/`.dark` value. One utility,
 both themes. This three-layer split is the cross-cutting idea; markup never needs to know which layer it
@@ -58,19 +59,21 @@ semantic tokens already flip,
 ## Shared classes via `@apply`
 
 `global.css` uses `@apply` inside `@layer components`/`utilities` for genuinely cross-cutting classes —
-`.h1`/`.h2`/`.h3`, `.description`, `.site-container`, `.form__input`, `.primary-focus`,
-`.main-text-gradient` (`global.css:104-145`). That's the sanctioned use of `@apply` (a pattern repeated
+`.h1`/`.h2`/`.h3`, `.description`, `.site-container`, `.primary-focus`,
+`.main-text-gradient` (`global.css:118-271`). That's the sanctioned use of `@apply` (a pattern repeated
 across many unrelated elements); something with structure/variants should be a component or a
 `tailwind-variants` config instead — which is exactly what the [[subsystems/ui-primitives]] library
 provides. Those primitives are now the main consumer of these tokens, and the `Input` primitive
-supersedes the `.form__input` helper here.
+replaced the former `.form__input` helper (since removed).
 
 ## Layer order, breakpoints, fonts
 
 Layer order is explicit: `@layer theme, base, components, utilities;` (`global.css:23`). Breakpoints
 (including a custom `xs: 400px`) and the font families are declared in `@theme`
-(`tailwind-theme.css:42-56`); `--font-sans` is wired to Inter, loaded via `fonts.css` (imported at the
-top of `global.css:8`).
+(`tailwind-theme.css:81-98`). The theme is a **two-face** system: `--font-display` is **Press Start
+2P** (the pixel heading face, drives `.h1`–`.h3`) and `--font-sans`/`--font-mono` are both **Space
+Mono** (the body/mono face, set on `<html>`), loaded via `fonts.css` (imported at the top of
+`global.css:8`).
 
 ## Animation tokens
 
