@@ -2,7 +2,7 @@
 title: Index
 type: overview
 created: 2026-06-30
-updated: 2026-07-22
+updated: 2026-07-23
 status: active
 ---
 
@@ -18,10 +18,10 @@ The concrete moving parts of the codebase.
 
 - [[subsystems/i18n]] — **removed** in two steps (fr + scripts 2026-07-17, helper layer 2026-07-18); the removal record: what replaced it (flat config, `siteLang`/`siteLocale`) and the re-add path.
 - [[subsystems/content-collections]] — `src/data/**` content, Zod schemas in `src/content.config.ts`, flat `<slug>` ids.
-- [[subsystems/keystatic-cms]] — **removed 2026-07-17** via `pnpm remove-keystatic`; the removal record, its knock-on effects (`trailingSlash: "always"`, fully static build), and the re-add path.
+- [[subsystems/keystatic-cms]] — **removed 2026-07-17** via `pnpm remove-keystatic`; the removal record, its knock-on effects (`trailingSlash: "always"`, and a fully static build at removal time — the later `/contact/` form reintroduced one SSR route on `@astrojs/node`), and the re-add path.
 - [[subsystems/styling-tokens]] — Tailwind v4 CSS-first token architecture (palette → semantic vars → utilities) and dark mode.
 - [[subsystems/motion]] — owned, dependency-free `animate-*` catalog (a port of tailwind-animations), the global reduced-motion guard, the `useAnimations` switch, the zero-JS `<Reveal>` scroll primitive, and the native motion mechanisms (marquee, `@starting-style` overlays, view transitions).
-- [[subsystems/ui-primitives]] — astro-boiler's own `tailwind-variants` primitive library at `src/components/ui/` (Tiers 1–3 + advanced-form batch built); the primitive contract, native-first interactivity, the `_field`/`_dialog`/`_overlay`/`_listbox`/`_popover`/`_client` shared modules, two overlay gotchas, dev-only catalog.
+- [[subsystems/ui-primitives]] — astro-boiler's own `tailwind-variants` primitive library at `src/components/ui/` (Tiers 1–3 + advanced-form batch built); the primitive contract, native-first interactivity, the `_field`/`_dialog`/`_overlay`/`_listbox`/`_popover`/`_client`/`_Chevron` shared modules (7), two overlay gotchas, dev-only catalog.
 - [[subsystems/icons]] — the owned SVG icon system at `src/components/svg/icons/`: typed `<Icon>` primitive over an auto-generated 571-icon registry (Stratis line icons + social brand marks), build-time inlined, Figma-MCP regeneration runbook.
 - [[subsystems/layouts-seo]] — `BaseLayout`/`BaseHead`: the page shell, font preload, pre-paint theme, view transitions (the SEO tags moved to their own page).
 - [[subsystems/seo]] — the owned, dependency-free technical-SEO layer: JSON-LD builders (`@js/schema`, auto Organization+WebSite graph), canonical≡`og:url`, enriched OG/Twitter + `article:*`, sitemap `filter`, dynamic `robots.txt`/`llms.txt`, `trailingSlash`.

@@ -2,11 +2,14 @@
 title: Technical SEO
 type: subsystem
 created: 2026-07-01
-updated: 2026-07-21
+updated: 2026-07-23
 tags: [seo, structured-data, json-ld, sitemap, robots, hreflang, open-graph]
 sources:
   - src/layouts/BaseHead.astro
   - src/js/schema.ts
+  - src/js/rss.ts
+  - src/pages/rss.xml.ts
+  - src/pages/blog/[slug].astro
   - src/pages/robots.txt.ts
   - src/pages/llms.txt.ts
   - astro.config.mjs
@@ -28,8 +31,8 @@ Dependency-free JSON-LD builders. Each returns a plain `JsonLdNode` (`schema.ts:
 typed precisely, node shape stays loose because schema.org is open-ended. The builders:
 `getOrganizationSchema` (`schema.ts:71`), `getWebSiteSchema` (`schema.ts:98`), `getSiteSchema`
 (`schema.ts:136`, composes the two into the site-level graph, linked by `@id`), `getArticleSchema`
-(`schema.ts:174`, emits `BlogPosting`), `getBreadcrumbSchema` (`schema.ts:216`), and `serializeJsonLd`
-(`schema.ts:234`). Stable `@id`s (`organizationId`, `schema.ts:49`) let nodes cross-reference inside a
+(`schema.ts:174`, emits `BlogPosting`), `getBreadcrumbSchema` (`schema.ts:218`), and `serializeJsonLd`
+(`schema.ts:236`). Stable `@id`s (`organizationId`, `schema.ts:49`) let nodes cross-reference inside a
 `@graph`, so WebSite/Article point at the Organization by `@id` rather than duplicating it.
 
 `BaseHead` emits a **site-level graph on every page** — it imports only `getSiteSchema`
@@ -38,7 +41,7 @@ call built from `siteData` (`BaseHead.astro:35-43`) — then merges any page-spe
 `schema` prop and serializes once into a single `<script type="application/ld+json" is:inline>`
 (`BaseHead.astro:100`).
 
-> [!note] `serializeJsonLd` escapes `<` → `<` (`schema.ts:240`) so a value containing `</script>`
+> [!note] `serializeJsonLd` escapes `<` → `<` (`schema.ts:242`) so a value containing `</script>`
 > can't break out of the inline tag. A single node inlines directly; multiple nodes wrap in `@graph`.
 > The logic carries a runnable self-check: `pnpm test` (or directly: `node --experimental-strip-types src/js/schema.test.ts`).
 
@@ -65,8 +68,9 @@ re-add path.
 ## Crawlability & indexation
 
 - **Sitemap** — `@astrojs/sitemap` emits `/sitemap-index.xml` (linked in `BaseHead`). A `filter`
-  (`astro.config.mjs:50`) drops `noindex` routes (the dev-only `/examples` catalog and 404s), so the
-  sitemap never contradicts a page's `noindex`.
+  (`astro.config.mjs:60`) drops `noindex` routes (the dev-only `/examples` catalog and 404s), so the
+  sitemap never contradicts a page's `noindex`. The on-demand `/contact/` route emits no static file,
+  so it is added by hand via the sitemap's `customPages`.
 - **robots.txt** — a **dynamic endpoint** (`src/pages/robots.txt.ts`), not a `/public` file, so the
   `Sitemap:` line resolves against `site` and never drifts. Allows everything since the Keystatic
   removal dropped the `/keystatic` Disallow (`robots.txt.ts:9`). Prerenders to a static `/robots.txt`.
@@ -74,22 +78,30 @@ re-add path.
   AI crawlers (llmstxt.org) from `siteData` + `site`. A curated map, not an auto-sitemap; not a ranking
   factor. Marked `ponytail:` to expand as the site grows.
 - **Trailing slashes** — one URL shape, now enforced by config: `trailingSlash: "always"`
-  (`astro.config.mjs:14`), agreeing with the directory build, `getLocalizedRoute`, canonical,
-  hreflang, and OG. It had been loosened to `"ignore"` only because `"always"` 404'd Keystatic's
-  extensionless API calls; [[subsystems/keystatic-cms|removing Keystatic]] (2026-07-17) allowed
-  tightening it back.
+  (`astro.config.mjs:50`), agreeing with the directory build, canonical, and OG. It had been loosened
+  to `"ignore"` only because `"always"` 404'd Keystatic's extensionless API calls;
+  [[subsystems/keystatic-cms|removing Keystatic]] (2026-07-17) allowed tightening it back.
 
-## What's deliberately deferred (YAGNI)
+## Content pages — the live blog route
 
-The blog collection ([[subsystems/content-collections]]) exists but has **no route yet**, so RSS and a
-visible breadcrumb component aren't built — a feed/breadcrumb for non-existent pages would be premature.
-When the blog route lands: add a dependency-free per-locale `rss.xml.ts` (hand-rolled, escaped RSS 2.0,
-like everything else in `head`), pass `getArticleSchema` + `getBreadcrumbSchema` + the `article` prop
-from the post page, and make `heroImage` required so every post has an OG image. See `.claude/rules/seo.md`.
+The blog route ships (`/blog/` + `/blog/<slug>/`) over the `blog` + `authors`
+([[subsystems/content-collections]]) collections, and the SEO pieces that ride with it are built:
+
+- **RSS** — a dependency-free `src/pages/rss.xml.ts` maps the `blog` collection to escaped RSS 2.0 via
+  the `@js/rss` renderer (pure + self-checked by `src/js/rss.test.ts`); linked from the footer,
+  `BaseHead`, and `llms.txt`. Single feed now that the site is single-language.
+- **Article + breadcrumb schema** — the post page (`blog/[slug].astro`) passes `getArticleSchema` (a
+  `BlogPosting` keyed `${url}#article`, with a `publisher` reference to the site Organization and
+  `author.url` from the author's `authorLink`) **and** `getBreadcrumbSchema`, the latter paired with a
+  **visible** breadcrumb in `BlogArticle` (`Home › Blog › <title>`) so markup and schema agree.
+  `dateModified` is emitted only when the post carries an `updatedDate`, never invented.
+- **`heroImage` is required** on blog posts (`content.config.ts`), so every post has an OG image. See
+  `.claude/rules/seo.md`.
 
 ## Consumers & the flow
 
 Every page rendering through [[subsystems/layouts-seo|BaseLayout]] gets the Organization + WebSite graph
 and the full meta/OG set for free; content pages add their own nodes via `schema`. The `site` value in
-`astro.config.mjs` (still `https://example.com`) feeds **all** of it — canonical, OG, hreflang, sitemap,
-robots, llms — so setting it once before deploy fixes every absolute URL at once.
+`astro.config.mjs` (the `SITE_URL` env var, still defaulting to the `https://example.com` placeholder)
+feeds **all** of it — canonical, OG, sitemap, robots, llms — so setting it once before deploy fixes
+every absolute URL at once.

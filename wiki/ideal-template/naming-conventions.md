@@ -2,7 +2,7 @@
 title: Ideal template — naming conventions
 type: standard
 created: 2026-06-30
-updated: 2026-07-21
+updated: 2026-07-23
 tags: [naming, components, conventions]
 sources:
   - src/components/Sections/README.md
@@ -22,9 +22,10 @@ component library grows into. Pairs with [[architecture]] (where things live) an
 
 > [!note] Provenance — naming is distilled from the reference starter [[sources/galaxy-main]], adapted
 > 2026-07-18 to the `Sections/`/`Cards/` restructure ([[concepts/page-composition]]). astro-boiler
-> ships `Sections/` (Home, Legal, NotFound, UiCatalog), an empty-on-purpose `Cards/`, and the built
-> `ui/` primitive library ([[subsystems/ui-primitives]]) today; the richer variant/sub-component rules
-> below still describe the standard, not current files.
+> ships `Sections/` (About, Blog, Contact, Global, Home, Legal, NotFound, Project, UiCatalog), a
+> populated `Cards/` (ContentCard, PixelCardLink), and the built `ui/` primitive library
+> ([[subsystems/ui-primitives]]) today; the richer variant/sub-component rules below still describe the
+> standard, not current files.
 
 ## Components — PascalCase folders under a role root
 
@@ -34,7 +35,7 @@ role root every folder and file is PascalCase:
 
 ```
 src/components/Sections/<Page>/<Name>.astro   e.g. Sections/NotFound/NotFound.astro  ✓
-src/components/Cards/<Name>Card.astro         (target — none built yet)
+src/components/Cards/<Name>Card.astro         e.g. Cards/ContentCard.astro  ✓
 ```
 
 The per-page folder is the unit — it gives a page's sections, their sub-parts, and future variants a

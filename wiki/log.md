@@ -2,7 +2,7 @@
 title: Log
 type: overview
 created: 2026-06-30
-updated: 2026-07-22
+updated: 2026-07-23
 status: active
 ---
 
@@ -438,3 +438,37 @@ wired into `BaseLayout`. New: `config/navData.json.ts` (+ `NavItemProps`), `src/
   `siteData` off the Astro Boiler placeholder. Created [[design/homepage-figma]] as the reusable
   Figma-hex→token mapping + decision record; linked from [[index]]. Verified: lint/check/build/test
   green, browser-checked light+dark + hover + mobile drawer.
+
+## [2026-07-23] refactor | template hygiene — root cruft + primitive-count true-up
+
+Buyer-facing cleanup ahead of any template hand-off. Removed three tracked junk files from the repo
+root that would ship in a folder zip: `g.html` + `ri.html` (34 KB built-page snapshots, reproducible
+via `pnpm build`) and `cj2.txt` (a stray curl cookie jar, `# Netscape HTTP Cookie File`). Moved the
+unique `audit-prompt.md` into `tasks/` beside its sibling handoff prompts rather than deleting it, and
+dropped the empty untracked `.agents/` + `.codex/` dirs.
+
+Trued up the UI-primitive count to the real **39** (the `src/components/ui/` folder count, already what
+`README.md:98` states): `architecture.md` said 38, `.claude/rules/seo.md` said "the other 43" → 38
+(39 total minus breadcrumb). The [2026-07-21] entry's "real 38" figure below was correct when written —
+a primitive has since been added; earlier log entries left untouched as usual. Confirmed the README is
+already current — no stale i18n/Keystatic or `config-i18n`/`remove-keystatic` script docs, its only
+mention correctly records the removal — and `AGENTS.md` ≠ `CLAUDE.md` (the latter is the importing
+pointer). Added a "remove the authoring notes" step to the README deploy checklist. Verified:
+`pnpm lint && pnpm check && pnpm build && pnpm test` green (0 errors, 229 files, 11/11 checks).
+
+## [2026-07-23] sync | template-debt cleanup — docs re-grounded to the live theme
+
+Part of the template-debt cleanup (`tasks/template-debt-cleanup-handoff.md`), which took the repo from
+skeleton to a working buyer-facing theme: live `/blog/`, `/projects/`, and an SSR `/contact/` (Resend,
+`@astrojs/node`); populated `blog`/`projects`/`authors` collections; live RSS + Article/breadcrumb
+JSON-LD; `Sections/Global/` populated (Header, Footer, + SectionHeading/CardGrid/Scoreboard promoted
+from `Home/`); blog/project data utils moved to `src/js/`; a new `config/portfolioData.json.ts` buyer
+data layer; 39 primitives + 7 internal modules. Re-grounded the docs still describing the old skeleton.
+Touched: overview, index, ideal-template/architecture, ideal-template/naming-conventions,
+subsystems/content-collections, subsystems/seo, subsystems/ui-primitives, concepts/page-composition,
+plus `src/components/{Sections,Cards}/README.md` and `.claude/rules/seo.md`. Fixes: "no blog route" /
+"Global not created" / "collections empty" / "fully static" → current reality (fully-static kept only
+as removal-era history); ThemeToggle documented as reusing `.pixel-btn` (its own `themeToggle` recipe),
+not the `button` recipe; `getBreadcrumbSchema` now used (blog posts pair `BlogPosting` with a visible
+breadcrumb); primitive count trued to 39; i18n/Keystatic in past tense (removal pages kept). Cite drift
+from the extended `getArticleSchema` reconciled in subsystems/seo.md.
