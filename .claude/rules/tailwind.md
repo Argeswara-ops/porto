@@ -48,11 +48,12 @@ the company that owns it and apply it via inline `style` (a computed `bg-[…]` 
 the compiler — see "Never interpolate class names" below).
 
 Artwork that is merely _decorative_ does **not** qualify — it is the theme's own, so it themes.
-`Sections/NotFound/NotFoundIllustration.astro` is the outstanding violation in this repo: it mixes
-`currentColor` (4 uses) with a stock palette of raw hex (`#47E6B1`, `#4D8AF0`, `#808080`, `#E0E0E0`,
-`#F55F44` — 30 uses), so its paper and accent layers do not follow the theme. Moving an illustration
-onto `currentColor` + `fill-background` / `fill-foreground` is the fix; a stock SVG pasted in with
-its own palette will otherwise sit there light-mode-white in dark mode.
+`Sections/NotFound/NotFoundIllustration.astro` is the reference for getting this right: its shapes
+use `currentColor` (driven by `text-primary` on the root `<svg>`) and token fills
+(`fill-base-300` / `fill-info` / `fill-success` / `fill-secondary`) with `var(--color-base-400)`
+gradient stops, so its paper and accent layers follow the theme in both modes — no raw hex. A stock
+SVG pasted in with its own palette would instead sit there light-mode-white in dark mode; move it
+onto `currentColor` + token fills the same way before you ship it.
 
 ## Dark mode
 

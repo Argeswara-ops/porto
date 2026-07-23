@@ -2,13 +2,16 @@
 title: SVG icon system
 type: subsystem
 created: 2026-07-02
-updated: 2026-07-18
+updated: 2026-07-23
 tags: [icons, svg, ui, figma]
 sources:
   - src/components/svg/icons/Icon.astro
   - src/components/svg/icons/icons.ts
   - src/components/svg/icons/index.ts
   - src/components/svg/icons/README.md
+  - src/components/svg/pixel-icons/PixelIcon.astro
+  - src/components/svg/pixel-icons/pixelIcons.ts
+  - src/components/svg/pixel-icons/index.ts
   - src/components/Sections/UiCatalog/IconsCatalog.astro
 status: active
 ---
@@ -41,8 +44,28 @@ frontmatter-export allowance covers it explicitly — `eslint.config.mjs:44` glo
 - **A11y:** decorative by default (`aria-hidden`, `Icon.astro:32`); passing `title` flips it to
   `role="img"` with a `<title>` (`Icon.astro:31,35`).
 
-The barrel (`index.ts`) exports `Icon`, `icon` (via `IconVariants`), `iconNames`, and the
+The barrel (`index.ts`) exports `Icon`, the bare `icon` recipe, `iconNames`, and the
 `IconName` type.
+
+## The pixel-icon sibling registry — `<PixelIcon>`
+
+A second, smaller registry sits beside this one: `src/components/svg/pixel-icons/` (`<PixelIcon>` over
+`PIXEL_ICONS`, 19 glyphs — socials, brand marks, and tech-stack icons). It renders on real pages (the
+home Tech Stack chips via `PixelChip`, the About Skill Tree, the footer socials), so it is **not**
+dev-only and **not** redundant with `<Icon>` — the two are a deliberate split:
+
+- `svg/icons` is **stroke-based** on a fixed 24×24 viewBox; `svg/pixel-icons` is **fill-based**
+  (`fill="currentColor"` + `shape-rendering="crispEdges"`) with each glyph on its **own native, often
+  non-square** viewBox (`PixelIcon.astro:33-36`). Merging would squash the non-square glyphs
+  (youtube/email).
+- Because the glyphs aren't square, the `size` variant sizes by **height + `w-auto`**
+  (`PixelIcon.astro:18-20`) to preserve aspect ratio, where `<Icon>` sizes by `size-*`.
+
+It follows the same primitive contract otherwise: an exported `pixelIcon` recipe,
+`data-slot="pixel-icon"`, typed `PixelIconName` names, decorative-by-default a11y (`title` →
+`role="img"`). The barrel exports `PixelIcon`, the `pixelIcon` recipe, `pixelIconNames`, and the
+`PixelIconName` type (`pixel-icons/index.ts`). The glyphs are hand-ported from a Figma pixel-icon
+community set — the source note (file id + attribution) lives in `pixelIcons.ts:1-9`.
 
 ## Build-time only — the ponytail ceiling
 
