@@ -2,7 +2,7 @@
 title: Page composition & routing
 type: concept
 created: 2026-07-01
-updated: 2026-07-21
+updated: 2026-07-23
 tags: [routing, pages, sections, composition, seo]
 sources:
   - src/pages/index.astro
@@ -10,7 +10,12 @@ sources:
   - src/pages/privacy.astro
   - src/pages/terms.astro
   - src/pages/examples/[catalog].astro
+  - src/pages/blog/index.astro
+  - src/pages/blog/[slug].astro
+  - src/pages/projects/index.astro
+  - src/pages/contact.astro
   - src/components/Sections/README.md
+  - src/components/Sections/Global/CardGrid.astro
   - src/components/Cards/README.md
   - src/components/Sections/Home/Hero.astro
   - src/components/Sections/Legal/LegalArticle.astro
@@ -38,12 +43,14 @@ pages follow it.
    tags need. It composes one or more sections and holds no markup of its own.
 2. **Sections** (`src/components/Sections/<Page>/<Name>.astro`) are layout-free content blocks — a
    hero, a legal article, the 404 content. Page-specific sections live under their page's folder
-   (`Home/`, `Legal/`, `NotFound/`, `UiCatalog/`); a section used by 2+ pages moves to
-   `Sections/Global/`. A section never imports `BaseLayout`.
+   (`Home/`, `About/`, `Blog/`, `Project/`, `Contact/`, `Legal/`, `NotFound/`, `UiCatalog/`); a
+   section used by 2+ pages lives in `Sections/Global/`, which now holds `Header`, `Footer`,
+   `SectionHeading`, `CardGrid`, and `Scoreboard`. A section never imports `BaseLayout`.
 3. **Sub-parts and cards** — siblings in the section's folder for anything independently swappable
    (`NotFound/NotFoundIllustration.astro`, imported relatively), and `src/components/Cards/` for
-   content-aware card compositions built on the [[subsystems/ui-primitives|`ui/card` primitives]]
-   (empty on purpose until the first card lands).
+   content-aware card compositions built on the [[subsystems/ui-primitives|ui primitives]] — now
+   holding `ContentCard` (the shared post/project card) and the `PixelCardLink` shell, both built on
+   `ui/pixel-panel` rather than `ui/card` (they need `<a>`/`<article>` semantics).
 
 ## The exemplars in the repo
 
@@ -67,8 +74,22 @@ sub-part `NotFoundIllustration.astro` — the fullest example of all three tiers
 
 **UiCatalog** — `src/pages/examples/[catalog].astro` is the dev-only catalog route: `getStaticPaths`
 emits **no paths in a prod build** (`[catalog].astro:11-13`), so no HTML ships to production while
-`astro dev` still serves `/examples/ui/`; markup lives in `Sections/UiCatalog/` (nine catalog section
+`astro dev` still serves `/examples/ui/`; markup lives in `Sections/UiCatalog/` (eight catalog section
 files composed by `UiCatalog.astro` via relative imports).
+
+**Blog & Projects (collection-driven)** — `blog/index.astro` and `projects/index.astro` map a content
+collection to cards (`getSortedPosts().map(toPostCard)` / `getSortedProjects().map(toProjectCard)`, both
+producing `ContentCardProps`) and hand them to the shared `Global/CardGrid`. The detail routes
+(`blog/[slug].astro`, `projects/[slug].astro`) use `getStaticPaths` to emit one static page per entry and
+compose the article sections; the **blog** post additionally passes `getArticleSchema` +
+`getBreadcrumbSchema`, paired with a visible breadcrumb (see [[subsystems/seo]]). Keying each route and
+its card link on the same collection id keeps the grid links and the generated routes from drifting.
+
+**Contact (the one SSR route)** — `src/pages/contact.astro` is the only page that sets
+`export const prerender = false`: it takes the Resend form POST and re-renders with the result, so
+`@astrojs/node` (standalone) is mounted and the build splits into `dist/client/` + `dist/server/`. It
+still owns `BaseLayout` + SEO and composes `Sections/Contact/*` like every other route — the route shape
+is unchanged; only the rendering mode differs.
 
 ## The illustration sub-part — theming an SVG with tokens
 
@@ -101,8 +122,9 @@ reference if locales return.
 
 ## When this grows
 
-Sections that get shared (a real Header/Footer, a repeated CTA) go to `Sections/Global/`; repeated
-content-shaped markup becomes a card in `Cards/`. Follows the
+Shared sections live in `Sections/Global/` (`Header`, `Footer`, `SectionHeading`, `CardGrid`, and
+`Scoreboard` are already there — the last three promoted from `Home/` once other pages reused them);
+repeated content-shaped markup becomes a card in `Cards/` (`ContentCard`, `PixelCardLink`). Follows the
 [[concepts/lazy-senior-ethos|lazy-senior ethos]]: the route is the smallest thing that can be a route.
 
 Related: [[subsystems/layouts-seo]] · [[subsystems/i18n]] · [[ideal-template/architecture]] ·

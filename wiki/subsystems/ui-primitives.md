@@ -2,7 +2,7 @@
 title: UI primitives library
 type: subsystem
 created: 2026-06-30
-updated: 2026-07-18
+updated: 2026-07-23
 tags: [components, tailwind-variants, primitives, ui, tokens, forms, a11y]
 sources:
   - src/components/ui/README.md
@@ -68,6 +68,12 @@ can compose it; (4) **tokens only, never raw colors**; (5) **merge consumer over
 The static, zero-JS primitives are in place: **Button, Input, Label, Textarea, Badge, Card, Alert,
 Separator, Skeleton, Avatar**. Most are single-element; **Card** is the compound one, and the richest —
 it grew a full set of sub-parts plus `variant`/`size` knobs in PR #6 (see [[#card]] below).
+
+**Avatar** takes `src` as a bundled `ImageMetadata` (from `astro:assets` / `image()`) _or_ a plain URL
+string (`avatar/Avatar.astro:15`); a bundled image emits its intrinsic `width`/`height` to kill layout
+shift (a string has none). `alt` is **required whenever `src` is set** — the build _throws_ on a missing
+alt (`Avatar.astro:45`) rather than silently defaulting it (pass `alt=""` to mark an image decorative on
+purpose), a trust-boundary accessibility guard.
 
 ### Card
 
@@ -158,6 +164,12 @@ shared `_field` look (native `<select>` + token chevron); **Checkbox/Radio/Switc
 styled `appearance-none` + `peer`/`:checked` (zero-JS); **Table** is static `<table>` styling in an
 `overflow-x-auto` wrapper.
 
+**Switch** carries two class targets worth calling out: the consumer `class` merges into the root
+`<label>` (the box/sizing, per contract rule 5 — `switch/Switch.astro:30`), while its exported
+**`switchTrack`** recipe styles the track slot (`data-slot="switch-track"`, `Switch.astro:18`). The
+track's `h-6`/`w-11` and the thumb's `peer-checked:translate-x-5` travel are tuned together, so restyle
+the track through the recipe/slot rather than resizing via the root class.
+
 ## V2 batch (built)
 
 PR #3 added static, zero-JS primitives: **Nav** (compound Nav/NavItem/NavLink, with underline/pills/
@@ -205,7 +217,9 @@ PR #4 (`04278de`) scaffolded the Preline "advanced forms" set as primitives
   visible input shows the label and a hidden input carries the value for form submission
   (`combobox/ComboBox.astro:57`). **AdvancedSelect** — searchable single/multi select backed by a real,
   visually-hidden native `<select>` so it still submits. **Searchbox** (+ Item) — a ⌘K command palette
-  that **reuses the Dialog shell** (`<dialog>` + `_dialog.ts`).
+  that **reuses the Dialog shell** (`<dialog>` + `_dialog.ts`); its own exported `searchbox` recipe is
+  only the outer wrapper (`searchbox/Searchbox.astro:15`), while the inner trigger and dialog reuse the
+  `DialogTrigger`/`Dialog` recipes rather than cloning them.
 
 The three interactive ones (ComboBox/AdvancedSelect/Searchbox) share a filter + roving kernel factored
 into **`_listbox.ts`**, and every scripted primitive re-inits through **`_client.ts`** — both covered in
@@ -214,16 +228,18 @@ into **`_listbox.ts`**, and every scripted primitive re-inits through **`_client
 ## Theme toggle (built)
 
 **ThemeToggle** (`theme-toggle/ThemeToggle.astro`) is a manual light/dark override on top of the device
-default. It **reuses the `button` config** (ethos rung 2) and the sun/moon icon flip is **CSS-only** —
-`size-4 dark:hidden` / `hidden size-4 dark:block` — so it is correct pre-paint with no flash; only the
-click ships JS (toggle `.dark`, persist `localStorage("colorTheme")`, sync `aria-pressed`), re-init
-through `_client.ts`'s `onReady`. It is the one primitive that is **not purely additive**: it pairs with
+default. It **reuses the global `.pixel-btn` CSS class** — the retro 8-bit button from `global.css`,
+_not_ the `button` `tv()` recipe — and exports its own small `themeToggle` config
+(`ThemeToggle.astro:18`) that re-skins `.pixel-btn` into a square icon button (a bare CSS class can't
+merge consumer overrides the tailwind-merge way, so the wrapper recipe is what composes). The
+meteor/moon icon flip is **CSS-only** — `dark:hidden` / `hidden dark:block` — so it is correct pre-paint
+with no flash; only the click ships JS (toggle `.dark`, persist `localStorage("colorTheme")`, sync
+`aria-pressed`), re-init through `_client.ts`'s `onReady`. It is the one primitive that is **not purely additive**: it pairs with
 an edit to [[subsystems/layouts-seo|BaseHead]]'s inline pre-paint script (`BaseHead.astro:138-168`), which
 now reads `localStorage("colorTheme")` before falling back to the device and only auto-follows OS changes
 while the user hasn't pinned a choice. That script stays **inline** pre-paint on purpose — moving it to a
-bundled `<script>` reintroduces the flash (CLAUDE.md gotcha). The dev catalog's old ad-hoc toggle button
-
-- script were removed in favor of the real primitive (it now drives the page's header switch).
+bundled `<script>` reintroduces the flash (CLAUDE.md gotcha). The dev catalog's old ad-hoc toggle
+button + script were removed in favor of the real primitive (it now drives the page's header switch).
 
 ## Why it drops onto the tokens with zero adaptation
 

@@ -2,7 +2,7 @@
 title: Ideal template — directory architecture
 type: standard
 created: 2026-06-30
-updated: 2026-07-21
+updated: 2026-07-23
 tags: [architecture, structure, conventions]
 sources:
   - CLAUDE.md
@@ -31,27 +31,37 @@ needs it (YAGNI — don't pre-create empties).
 ```
 src/
 ├── components/            ✓ role roots, PascalCase inside each (see [[naming-conventions]])
-│   ├── Sections/<Page>/  ✓ layout-free page sections (Home/, Legal/, NotFound/, UiCatalog/)
-│   │   └── Global/       →  cross-page sections (Header, Footer, CTA); create it with the first one
-│   ├── Cards/            ✓ content-aware card compositions (empty on purpose — first card lands here)
+│   ├── Sections/<Page>/  ✓ layout-free page sections (About/, Blog/, Contact/, Home/, Legal/, NotFound/, Project/, UiCatalog/)
+│   │   └── Global/       ✓  cross-page sections (Header, Footer, SectionHeading, CardGrid, Scoreboard)
+│   ├── Cards/            ✓ content-aware card compositions (ContentCard, PixelCardLink)
 │   ├── svg/icons/        ✓ the owned SVG icon system (`<Icon>` + typed `icons.ts` registry — [[subsystems/icons]])
-│   └── ui/               ✓ our own UI primitives library (38 primitives — [[subsystems/ui-primitives]])
+│   └── ui/               ✓ our own UI primitives library (39 primitives — [[subsystems/ui-primitives]])
 ├── layouts/              ✓ page-shell wrappers, PascalCase .astro (BaseLayout, BaseHead)
 │   └── Blog*Layout.astro →  per-content layouts as the content types arrive
 ├── pages/                ✓ file-based routes, kebab-case files — thin shells owning BaseLayout + SEO
-│   ├── index.astro       ✓
+│   ├── index.astro       ✓  (every route prerenders to static HTML except contact.astro)
+│   ├── about.astro       ✓
+│   ├── blog/             ✓  index.astro (listing) + [slug].astro (article) — live
+│   ├── projects/         ✓  index.astro (listing) + [slug].astro (detail) — live
+│   ├── contact.astro     ✓  SSR: `export const prerender = false`, Resend form on the @astrojs/node adapter
+│   ├── privacy.astro     ✓  · terms.astro ✓ · 404.astro ✓ (noindex)
+│   ├── robots.txt.ts / llms.txt.ts / rss.xml.ts   ✓  dynamic endpoints
 │   └── examples/         ✓ dev-only UI catalog (`[catalog].astro` — emits no prod paths, noindex, sitemap-excluded)
 ├── config/               ✓ typed site config — see [[concepts/config-driven]]
 │   ├── siteSettings.json.ts        ✓ siteLang/siteLocale + feature flags
 │   ├── siteData.json.ts            ✓ site metadata (name, title, author, OG default)
 │   ├── legalData.json.ts           ✓ terms + privacy content
+│   ├── navData.json.ts             ✓ header primary-nav link set (About · Projects · Blog · Contact)
+│   ├── portfolioData.json.ts       ✓ buyer-customized profile/bio/stat/intro/contact copy
 │   └── types/configDataTypes.ts    ✓ interfaces for the data files
 ├── data/                 ✓ content-collection source (flat slugs — [[subsystems/i18n]] removal)
-│   ├── blog/<slug>/index.md(x)            ✓ (dir exists, no entries yet)
-│   ├── authors/<slug>/index.md(x)         ✓ (referenced by blog)
+│   ├── blog/<slug>/index.mdx             ✓ (6 posts — live at /blog/)
+│   ├── projects/<slug>/index.mdx         ✓ (6 projects — live at /projects/)
+│   ├── authors/<slug>/index.md           ✓ (1: admin — referenced by blog)
 │   ├── otherPages/<slug>/                 →  privacy/terms/etc. as a collection
 │   └── codeToggles/<language>/            →  reusable code-sample snippets
-├── js/                   ✓ TypeScript utilities, camelCase (textUtils, schema)
+├── js/                   ✓ TypeScript utilities, camelCase (textUtils, schema, blogData/postCards,
+│                            projectData/projectCards, nav, resend, rss, readingTime, social)
 ├── styles/               ✓ CSS — global.css (entry), tailwind-theme.css, fonts.css
 │   └── buttons.css, markdown-content.css …  →  add per concern, imported into a @layer
 ├── assets/               ✓ optimizable media (astro:assets) — @images → assets/images
@@ -69,9 +79,12 @@ there is no `src/env.d.ts` and none is needed since Astro 5.)
 Entries live directly under their collection dir — ids are plain slugs since the i18n removal
 (`src/content.config.ts:7` documents the `<slug>` id). See [[subsystems/content-collections]].
 
-- `blog` → `src/data/blog/<slug>/index.md` (id `"<slug>"`).
-- `authors` → `src/data/authors/<slug>/index.md` (blog entries `reference("authors")` by slug —
-  `src/content.config.ts:19`).
+- `blog` → `src/data/blog/<slug>/index.mdx` (id `"<slug>"`; 6 posts, `heroImage` required —
+  `src/content.config.ts:27`).
+- `projects` → `src/data/projects/<slug>/index.mdx` (id `"<slug>"`; 6 projects — structured
+  spec/feature frontmatter plus a free-form MDX overview body).
+- `authors` → `src/data/authors/<slug>/index.md` (1 author `admin`; blog entries `reference("authors")`
+  by slug — `src/content.config.ts:22`).
 - `otherPages` (target) → `src/data/otherPages/<slug>/` — same shape as blog.
 - `codeToggles` (target) → `src/data/codeToggles/<language>/` — keyed by programming language.
 
@@ -90,10 +103,11 @@ Entries live directly under their collection dir — ids are plain slugs since t
 ## Why this shape
 
 The split is by **role, not by feature**: routing (`pages/`) stays thin — it owns `BaseLayout` + SEO
-and delegates markup to `components/Sections/` ([[concepts/page-composition]]); data and behavior live
-in typed `config/` ([[concepts/config-driven]]); cross-cutting logic lives in `js/` so a route never
-hand-rolls locale or date math. Growing the template means filling these slots,
-never inventing new top-level roles.
+and delegates markup to `components/Sections/` ([[concepts/page-composition]]), and prerenders to
+static HTML everywhere except the single SSR `/contact/` route (`@astrojs/node` standalone adapter, so
+the build splits into `dist/client/` + `dist/server/`); data and behavior live in typed `config/`
+([[concepts/config-driven]]); cross-cutting logic lives in `js/` so a route never hand-rolls date or
+mapping math. Growing the template means filling these slots, never inventing new top-level roles.
 
 Main threads: [[naming-conventions]] · [[code-quality]] · [[overview]] ·
 [[subsystems/content-collections]] · [[subsystems/scripts]]

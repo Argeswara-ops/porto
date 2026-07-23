@@ -70,12 +70,13 @@ brackets and cost a normalizing ternary on every render; it was removed.
   none.
 - **`getBreadcrumbSchema` requires a _visible_ breadcrumb nav — it is not a free win.** Emitting a
   `BreadcrumbList` on a page with no on-screen breadcrumb is markup and schema disagreeing, which is
-  the one thing structured data must never do. The builder ships unused **on purpose**: it is the
-  schema counterpart to the `src/components/ui/breadcrumb/` primitive, the same way the other 43
-  primitives ship unused. Build the nav first, then pass the node — don't reach for the builder
-  because it happens to exist. (A dead export with no counterpart is a different matter: an unused
-  helper that sits long enough starts getting cited in other files' docs as though it were part of
-  the pattern, and then it is load-bearing fiction. Delete those.)
+  the one thing structured data must never do. It is **now used**: blog posts pair a `BlogPosting`
+  with a visible breadcrumb nav (built on the `src/components/ui/breadcrumb/` primitive — one of the
+  39 primitives this template ships), so the schema and the on-screen trail agree. That is the bar
+  for any new page — build the nav first, then pass the node; don't reach for the builder because it
+  happens to exist. (A dead export with no counterpart is a different matter: an unused helper that
+  sits long enough starts getting cited in other files' docs as though it were part of the pattern,
+  and then it is load-bearing fiction. Delete those.)
 - Validate output in Google's Rich Results Test before shipping a new schema type.
 
 ## Crawlability & indexation
@@ -94,20 +95,20 @@ brackets and cost a normalizing ternary on every render; it was removed.
   hreflang is only meaningful with 2+ locales. Re-adding i18n means re-adding per-locale alternates +
   `x-default` in `BaseHead` (git history has the old block).
 
-## Content pages (blog) — wire these when the blog route lands
+## Content pages (blog) — shipped with the live blog route
 
-The `blog` + `authors` collections and `@astrojs/mdx` are wired, but **no `/blog/` route ships** —
-a stated decision, not an oversight, and the README says so in the same words so the two can't
-drift. Every project wants its blog shaped differently; the collections are the starting point.
-When the route lands, these three come with it (**deliberately not built** until then — YAGNI):
+The `/blog/` route is **live** (`src/pages/blog/index.astro` + `[slug].astro`) over the `blog` +
+`authors` collections and `@astrojs/mdx`. The three pieces that ride with a content route are built:
 
-- **RSS**: add a dependency-free endpoint (`src/pages/rss.xml.ts`) that maps the `blog` collection
-  to escaped RSS 2.0 — hand-rolled, like everything else in `head`. Link it from `BaseHead`,
-  `llms.txt`, and the footer.
-- **Article schema + `article` prop** on the post page (pattern above).
-- **`heroImage`** is optional in the schema today; make it **required** for a real blog so every post
-  has an OG image, and add `og:image:width/height` from the bundled `ImageMetadata` (BaseHead already
-  emits real dims when you pass an `image`).
+- **RSS**: a dependency-free endpoint (`src/pages/rss.xml.ts`) maps the `blog` collection to escaped
+  RSS 2.0 via the `@js/rss` renderer — hand-rolled like everything else in `head` (no `@astrojs/rss`),
+  self-checked by `src/js/rss.test.ts`. Linked from `BaseHead`, `llms.txt`, and the footer.
+- **Article schema + `article` prop** on the post page (`[slug].astro`): `getArticleSchema` emits a
+  `BlogPosting` with a stable `@id` (`${url}#article`), a `publisher` reference to the site
+  Organization, and `author.url` (from the author's `authorLink`). `dateModified` is emitted **only**
+  when the post has an `updatedDate` — never invented from `datePublished`.
+- **`heroImage` is required** on blog posts (`content.config.ts` — `image()`, not `.optional()`), so
+  every post has an OG image; `BaseHead` emits `og:image:width/height` from the bundled `ImageMetadata`.
 
 ## Images & Core Web Vitals
 
