@@ -92,7 +92,7 @@ export const button = tv({
 ## `@apply` is allowed here — for shared, cross-cutting classes
 
 This template uses `@apply` inside `@layer components`/`utilities` for reusable semantic classes, and that's
-correct usage: `.h1`, `.description`, `.site-container`, `.form__input`, `.primary-focus`,
+correct usage: `.h1`, `.description`, `.site-container`, `.primary-focus`,
 `.main-text-gradient`. Use `@apply` for a pattern repeated across many unrelated elements; reach for a
 **component** (or `tv`) when the thing has structure/variants. Don't `@apply` to "tidy" a one-off class list.
 
@@ -101,7 +101,7 @@ correct usage: `.h1`, `.description`, `.site-container`, `.form__input`, `.prima
 - `@import "tailwindcss";` (one line). Load plugins with `@plugin "@tailwindcss/forms";`.
 - Declare layer order explicitly: `@layer theme, base, components, utilities;` and import into a layer when
   needed: `@import "./buttons.css" layer(components);`.
-- Native CSS nesting is available (`.form__input { &::placeholder { @apply text-base-400; } }`).
+- Native CSS nesting is available (`.blog-prose { & a { @apply text-info; } }`, as in global.css).
 - Keep the `@theme` token file separate (`tailwind-theme.css`) so it can also be imported into a `.astro`
   `<style>` block.
 
