@@ -1,4 +1,4 @@
-// Self-check for readingTime.ts (see .claude/rules/typescript.md). `pnpm test` type-strips + runs it.
+// Self-check for readingTime.ts. `pnpm test` type-strips + runs it.
 import assert from "node:assert/strict";
 
 import { readingTime } from "./readingTime.ts";

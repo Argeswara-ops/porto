@@ -24,6 +24,6 @@
       "Bash(npx astro:*)"
     ],
     "ask": [],
-    "deny": ["Read(./.env)", "Read(./.env.*)"]
+    "deny": ["Read(./.env)", "Read(./.env.local)", "Read(./.env.production)"]
   }
 }

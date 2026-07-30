@@ -2,7 +2,7 @@
  * * Dependency-free RSS 2.0 rendering for the blog feed — the pure, testable core of the /rss.xml
  * endpoint (src/pages/rss.xml.ts), which only supplies the posts + the resolved `site` URL. Extracted
  * so the escaping (a security boundary) and the item/document shape are covered by rss.test.ts;
- * hand-rolled like everything else in <head>, no @astrojs/rss. See .claude/rules/seo.md.
+ * hand-rolled like everything else in <head>, no @astrojs/rss (see AGENTS.md: SEO is owned).
  */
 
 /** Escape the five XML predefined entities so a title/description/URL can't break the document. */
