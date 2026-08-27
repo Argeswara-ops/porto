@@ -7,20 +7,20 @@ import { type PortfolioDataProps } from "./types/configDataTypes";
 // portfolio) — keep it consistent if you rewrite.
 const portfolioData = {
   profile: {
-    tagline: "Dev 01",
-    heading: "The Full-Stack Dev",
-    role: "Full-Stack",
-    years: "8+",
+    tagline: "Fullstack Developer",
+    heading: "Argeswara Pradana Karamullah",
+    role: "Fullstack Web Developer",
+    years: "03+",
     bio: [
-      "Welcome to the mainframe. I'm a full-stack developer with 8+ years of experience building scalable web applications, APIs, and tools. This profile serves as a chronological log of my projects, open-source contributions, and the systems I've shipped.",
-      "I'm passionate about clean code, automated testing, and shipping fast. I write about modern frontend patterns, backend architecture, and the tools that keep my workflow efficient.",
+      "Halo, saya Argeswara Pradana Karamullah, fullstack web developer yang menikmati proses mengubah ide menjadi produk digital yang rapi, fungsional, dan berdampak.",
+      "Saya bekerja di sisi frontend dan backend, dari merancang antarmuka yang intuitif hingga membangun API dan sistem yang siap berkembang. Saya percaya pada kode yang jelas, kolaborasi yang terbuka, dan iterasi yang konsisten.",
     ],
     shortBio:
-      "I'm a developer who builds things with pixels, code, and a healthy dose of nostalgia. I write about the tech I use, the tools I love, and the retro systems that still inspire me.",
+      "Fullstack web developer yang membangun produk digital dengan perhatian pada detail, performa, dan pengalaman pengguna.",
     meta: {
-      location: "The Internet",
-      role: "Full Stack Dev",
-      favorite: "8-Bit Chiptunes",
+      location: "Indonesia",
+      role: "Fullstack Web Developer",
+      favorite: "Clean & Useful Product",
     },
     skills: [
       { label: "Frontend", pct: 95 },
@@ -29,19 +29,19 @@ const portfolioData = {
   },
 
   stats: {
-    home: ["Posts: 42", "Years: 03", "Coffee: 9000+"],
-    profile: ["Class: Full-Stack Dev", "Lvl: 8+", "XP: 8.5K", "Stars: 2.1K"],
+    home: ["Focus: Web", "Stack: JS/TS", "Status: Available"],
+    profile: ["Class: Fullstack", "Lvl: 03+", "XP: Shipping", "Status: Open"],
   },
 
   home: {
-    tagline: "Player 1",
-    heading: "Welcome, Player One",
+    tagline: "Argeswara Pradana Karamullah",
+    heading: "Fullstack Web Developer",
     intro:
-      "Level up your knowledge with my latest dev logs, tutorials, and retro tech explorations. Press start to begin your journey.",
+      "Saya merancang dan membangun website serta aplikasi web dari frontend hingga backend. Jelajahi proyek, keahlian, dan cara saya bekerja.",
   },
 
   contact: {
-    prompt: "Want to chat about a project, a retro build, or just share a favorite game?",
+    prompt: "Punya ide produk digital atau ingin berkolaborasi? Mari ngobrol dan wujudkan solusi web yang tepat.",
   },
 } satisfies PortfolioDataProps;
 
