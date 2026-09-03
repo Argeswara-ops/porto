@@ -6,7 +6,7 @@
 //
 // WIRING (real, not transcribed): the prompt comes from portfolioData.contact; EMAIL ME → mailto
 // author email; the three social chips resolve through `@config/socialData`, which owns each
-// platform's label, glyph and sameAs derivation (including Twitter's author-handle preference).
+// platform's label, glyph and sameAs derivation.
 // LET'S TALK → /contact/.
 import SectionHeading from "@components/Sections/Global/SectionHeading.astro";
 import { Reveal } from "@components/ui/reveal";
@@ -16,7 +16,7 @@ import { socialLink } from "@config/socialData.json";
 
 import PixelChip from "./PixelChip.astro";
 
-const socials = [socialLink("github"), socialLink("twitter"), socialLink("linkedin")];
+const socials = [socialLink("github"), socialLink("instagram"), socialLink("linkedin")];
 ---
 
 <Reveal as="section" aria-labelledby="contact-heading" class="flex flex-col gap-6">

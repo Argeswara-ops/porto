@@ -31,12 +31,11 @@ export const socialPlatforms = {
     match: "linkedin.com",
     fallback: "https://www.linkedin.com/",
   },
-  // `author.twitter` wins when set, because a handle is more specific than a sameAs host match.
-  twitter: {
-    label: "Twitter/X",
-    icon: "twitter",
-    match: ["x.com", "twitter.com"],
-    fallback: "https://x.com/",
+  instagram: {
+    label: "Instagram",
+    icon: "instagram",
+    match: "instagram.com",
+    fallback: "https://www.instagram.com/",
   },
   youtube: {
     label: "YouTube",
@@ -63,16 +62,13 @@ export type IconSocialPlatform = {
  * * Resolve a platform's destination URL.
  *
  * The one derivation every section shares: the first matching `sameAs` entry, else the platform's
- * fallback. Twitter/X additionally prefers `siteData.author.twitter` when the buyer set a handle.
+ * fallback.
  *
  * @param platform a key of `socialPlatforms`
  * @returns an absolute URL, never empty
  */
 export function socialHref(platform: SocialPlatform): string {
   const { match, fallback } = socialPlatforms[platform];
-  if (platform === "twitter" && siteData.author.twitter) {
-    return `https://x.com/${siteData.author.twitter}`;
-  }
   return socialUrl(siteData.sameAs, match, fallback);
 }
 
